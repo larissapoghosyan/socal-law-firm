@@ -219,9 +219,9 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
   return (
     <>
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-md py-2' : 'bg-white/98 backdrop-blur-md py-3'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center min-h-[90px] sm:min-h-[110px] lg:min-h-[120px]">
-            {/* Crisp High-Res Logo */}
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12">
+          <div className="flex justify-between items-center min-h-[90px] sm:min-h-[110px] lg:min-h-[120px] 2xl:min-h-[140px]">
+            {/* Crisp High-Res Logo for All Displays including 17"+ & 4K */}
             <button
               onClick={() => setCurrentPage("home")}
               className="flex items-center group cursor-pointer py-1"
@@ -229,7 +229,7 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
               <img
                 src={logoImg}
                 alt="So Cal Legal Group, Inc."
-                className="h-20 sm:h-24 md:h-28 lg:h-32 w-auto object-contain max-w-[260px] sm:max-w-[340px] md:max-w-[420px] transition-all duration-300"
+                className="h-20 sm:h-24 md:h-28 lg:h-32 xl:h-36 2xl:h-40 w-auto object-contain max-w-[260px] sm:max-w-[340px] md:max-w-[420px] xl:max-w-[500px] 2xl:max-w-[580px] transition-all duration-300"
                 style={{ imageRendering: "-webkit-optimize-contrast" }}
               />
             </button>
@@ -394,7 +394,7 @@ function HomePage({ setCurrentPage }: any) {
       {/* Hero Section */}
       <section className="relative bg-primary text-primary-foreground overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-pattern"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+        <div className="relative max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 py-20 lg:py-28">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-7">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight" style={{ fontFamily: 'var(--font-serif)' }}>
@@ -444,7 +444,7 @@ function HomePage({ setCurrentPage }: any) {
 
       {/* Practice Area Cards */}
       <section className="py-20 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="text-center mb-16">
             <div className="inline-block px-4 py-1.5 bg-primary/10 rounded-full mb-3">
               <span className="text-sm font-bold text-primary">PRACTICE AREAS</span>
@@ -479,7 +479,7 @@ function HomePage({ setCurrentPage }: any) {
 
       {/* Main Page Sections Provided in Info Text */}
       <section className="py-20 bg-card border-y border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 space-y-16">
           {/* Representation Built on Trust, Integrity & Results */}
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -522,7 +522,7 @@ function HomePage({ setCurrentPage }: any) {
 
       {/* Attorney Spotlight Component */}
       <section className="py-20 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl border border-border">
               <img 
@@ -621,7 +621,7 @@ function AboutPage({ setCurrentPage }: any) {
     <main className="pt-32 sm:pt-36 lg:pt-40 pb-20 lg:pb-0">
       {/* Hero Profile Section */}
       <section className="py-20 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="grid lg:grid-cols-12 gap-12 items-start">
             {/* Left: Portrait & Contact Card */}
             <div className="lg:col-span-5 space-y-6">
@@ -736,7 +736,7 @@ function EmploymentLawPage({ setCurrentPage }: any) {
   return (
     <main className="pt-32 sm:pt-36 lg:pt-40 pb-20 lg:pb-0">
       <section className="py-16 bg-primary text-primary-foreground">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12">
           <h1 className="text-4xl lg:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
             Employment Law
           </h1>
@@ -770,7 +770,7 @@ function PersonalInjuryPage({ setCurrentPage }: any) {
   return (
     <main className="pt-32 sm:pt-36 lg:pt-40 pb-20 lg:pb-0">
       <section className="py-16 bg-primary text-primary-foreground">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12">
           <h1 className="text-4xl lg:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
             Personal Injury
           </h1>
@@ -804,7 +804,7 @@ function LemonLawPage({ setCurrentPage }: any) {
   return (
     <main className="pt-32 sm:pt-36 lg:pt-40 pb-20 lg:pb-0">
       <section className="py-16 bg-primary text-primary-foreground">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12">
           <h1 className="text-4xl lg:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
             Lemon Law
           </h1>
@@ -913,7 +913,7 @@ function ContactPage() {
   return (
     <main className="pt-32 sm:pt-36 lg:pt-40 pb-20 lg:pb-0">
       <section className="py-16 bg-primary text-primary-foreground">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12">
           <h1 className="text-4xl lg:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
             Contact So Cal Legal Group
           </h1>
@@ -924,7 +924,7 @@ function ContactPage() {
       </section>
 
       <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-16">
             {/* Left: Contact Details */}
             <div>
@@ -1074,7 +1074,7 @@ function ContactPage() {
 function Footer({ setCurrentPage }: any) {
   return (
     <footer className="bg-primary text-primary-foreground pt-16 pb-8 border-t border-primary-foreground/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12">
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Logo & Info */}
           <div className="md:col-span-2">
