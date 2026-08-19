@@ -26,5 +26,5 @@ npm run build
 
 Environment variables can be configured in a `.env` file or repository secrets:
 
-- `VITE_SITE_PASSCODE`: Access passcode for preview mode (default: `socal2026`).
+- `VITE_SITE_PASSCODE_HASH`: SHA-256 hash of the access passcode.
 - `VITE_GOOGLE_SHEETS_URL`: Web app endpoint for Google Sheets form integration.
