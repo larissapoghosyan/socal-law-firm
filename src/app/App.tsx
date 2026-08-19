@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Phone, MessageSquare, Calendar, ChevronDown, MapPin, Clock, Mail, Facebook, Twitter, Linkedin, Instagram, Star, CheckCircle2, Scale, Shield, Users, AlertCircle, TrendingUp, FileText, Award, Gavel } from "lucide-react";
-import logoImg from "@/imports/Main_logo_graphic.png";
+import logoImg from "@/imports/Main_logo_socal.png";
 import headshot1 from "@/imports/headshot_1.jpeg";
 import headshot2 from "@/imports/headshot_2.jpeg";
 
