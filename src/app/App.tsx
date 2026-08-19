@@ -88,44 +88,74 @@ export default function App() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-navy-950 bg-pattern flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-navy-900/90 backdrop-blur-md border border-navy-700/80 rounded-2xl p-8 shadow-2xl text-white">
-          <div className="flex justify-center mb-6">
-            <img src={logoImg} alt="So Cal Legal Group, Inc." className="h-16 object-contain" />
-          </div>
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gold-500/20 text-gold-400 mb-3 border border-gold-500/30">
-              <Shield className="w-6 h-6" />
+      <div className="min-h-screen bg-slate-950 bg-pattern flex items-center justify-center p-4">
+        <div className="max-w-lg w-full bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 sm:p-10 shadow-2xl text-white relative overflow-hidden">
+          {/* Subtle Accent Light */}
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          {/* Logo & Header */}
+          <div className="text-center mb-8">
+            <img 
+              src={logoImg} 
+              alt="So Cal Legal Group, Inc." 
+              className="h-20 w-auto object-contain mx-auto mb-6 brightness-0 invert" 
+            />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full mb-4 text-xs font-semibold text-amber-400">
+              <Shield className="w-3.5 h-3.5" />
+              <span>Private Client Preview</span>
             </div>
-            <h2 className="text-2xl font-serif font-bold text-white mb-1">Private Client Preview</h2>
-            <p className="text-navy-300 text-sm">Please enter the passcode to access the website.</p>
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white mb-2">
+              So Cal Legal Group, Inc.
+            </h1>
+            <p className="text-slate-300 text-sm leading-relaxed max-w-sm mx-auto">
+              Welcome to our website preview. Please enter your passcode below to unlock and explore the site.
+            </p>
           </div>
-          <form onSubmit={handlePasscodeSubmit} className="space-y-4">
+
+          {/* Form */}
+          <form onSubmit={handlePasscodeSubmit} className="space-y-5">
             <div>
-              <input
-                type="password"
-                placeholder="Enter Passcode"
-                value={passcodeAttempt}
-                onChange={(e) => setPasscodeAttempt(e.target.value)}
-                className="w-full px-4 py-3 bg-navy-950/80 border border-navy-700 rounded-xl text-white placeholder-navy-400 focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-colors"
-                autoFocus
-              />
+              <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">
+                Enter Passcode
+              </label>
+              <div className="relative">
+                <input
+                  type="password"
+                  placeholder="e.g. socal2026"
+                  value={passcodeAttempt}
+                  onChange={(e) => setPasscodeAttempt(e.target.value)}
+                  className="w-full px-4 py-3.5 bg-slate-950/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all font-mono text-base"
+                  autoFocus
+                />
+              </div>
+              
               {passcodeError && (
-                <p className="text-red-400 text-xs mt-2 flex items-center gap-1">
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  {passcodeError}
-                </p>
+                <div className="mt-3 p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{passcodeError}</span>
+                </div>
               )}
             </div>
+
             <button
               type="submit"
-              className="w-full py-3 bg-gold-500 hover:bg-gold-600 text-navy-950 font-bold rounded-xl shadow-lg transition-colors cursor-pointer"
+              className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer text-base"
             >
-              Unlock Website
+              Access Website
             </button>
           </form>
-          <div className="mt-6 text-center text-xs text-navy-400 border-t border-navy-800 pt-4">
-            So Cal Legal Group, Inc. &bull; Private Access Only
+
+          {/* Passcode Hint Box */}
+          <div className="mt-6 p-3.5 bg-slate-950/60 border border-slate-800 rounded-xl text-center">
+            <p className="text-xs text-amber-400 font-mono font-medium">
+              Demo Passcode: <span className="bg-amber-500/20 px-2 py-0.5 rounded text-white font-bold">socal2026</span>
+            </p>
+          </div>
+
+          {/* Footer Info */}
+          <div className="mt-8 pt-6 border-t border-slate-800/80 text-center text-xs text-slate-400 space-y-1">
+            <p className="font-semibold text-slate-300">Arpi Sislyan, Esq. &bull; Partner</p>
+            <p>Direct Phone: <a href="tel:8182322760" className="text-amber-400 hover:underline">(818) 232-2760</a></p>
           </div>
         </div>
       </div>
