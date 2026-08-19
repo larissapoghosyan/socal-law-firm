@@ -218,19 +218,19 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-md' : 'bg-white/95 backdrop-blur-sm'}`}>
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-md py-2' : 'bg-white/98 backdrop-blur-md py-3'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-28">
-            {/* Logo */}
+          <div className="flex justify-between items-center min-h-[90px] sm:min-h-[110px] lg:min-h-[120px]">
+            {/* Crisp High-Res Logo */}
             <button
               onClick={() => setCurrentPage("home")}
-              className="flex items-center group cursor-pointer"
+              className="flex items-center group cursor-pointer py-1"
             >
               <img
                 src={logoImg}
                 alt="So Cal Legal Group, Inc."
-                className="h-16 w-auto object-contain"
-                style={{ transform: "scale(2.3)", transformOrigin: "left center" }}
+                className="h-20 sm:h-24 md:h-28 lg:h-32 w-auto object-contain max-w-[260px] sm:max-w-[340px] md:max-w-[420px] transition-all duration-300"
+                style={{ imageRendering: "-webkit-optimize-contrast" }}
               />
             </button>
 
@@ -390,7 +390,7 @@ function MobileBottomBar({ setCurrentPage }: any) {
 // Home Page
 function HomePage({ setCurrentPage }: any) {
   return (
-    <main className="pt-28 pb-20 lg:pb-0">
+    <main className="pt-32 sm:pt-36 lg:pt-40 pb-20 lg:pb-0">
       {/* Hero Section */}
       <section className="relative bg-primary text-primary-foreground overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-pattern"></div>
@@ -618,7 +618,7 @@ function PracticeAreaCard({ icon, title, description, onClick }: any) {
 // About / Attorney Page
 function AboutPage({ setCurrentPage }: any) {
   return (
-    <main className="pt-28 pb-20 lg:pb-0">
+    <main className="pt-32 sm:pt-36 lg:pt-40 pb-20 lg:pb-0">
       {/* Hero Profile Section */}
       <section className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -734,7 +734,7 @@ function AboutPage({ setCurrentPage }: any) {
 // Employment Law Page
 function EmploymentLawPage({ setCurrentPage }: any) {
   return (
-    <main className="pt-28 pb-20 lg:pb-0">
+    <main className="pt-32 sm:pt-36 lg:pt-40 pb-20 lg:pb-0">
       <section className="py-16 bg-primary text-primary-foreground">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl lg:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
@@ -768,7 +768,7 @@ function EmploymentLawPage({ setCurrentPage }: any) {
 // Personal Injury Page
 function PersonalInjuryPage({ setCurrentPage }: any) {
   return (
-    <main className="pt-28 pb-20 lg:pb-0">
+    <main className="pt-32 sm:pt-36 lg:pt-40 pb-20 lg:pb-0">
       <section className="py-16 bg-primary text-primary-foreground">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl lg:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
@@ -802,7 +802,7 @@ function PersonalInjuryPage({ setCurrentPage }: any) {
 // Lemon Law Page
 function LemonLawPage({ setCurrentPage }: any) {
   return (
-    <main className="pt-28 pb-20 lg:pb-0">
+    <main className="pt-32 sm:pt-36 lg:pt-40 pb-20 lg:pb-0">
       <section className="py-16 bg-primary text-primary-foreground">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl lg:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
@@ -836,7 +836,7 @@ function LemonLawPage({ setCurrentPage }: any) {
 // Testimonials Page
 function TestimonialsPage({ setCurrentPage }: any) {
   return (
-    <main className="pt-28 pb-20 lg:pb-0">
+    <main className="pt-32 sm:pt-36 lg:pt-40 pb-20 lg:pb-0">
       <section className="py-16 bg-primary text-primary-foreground text-center">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl lg:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
@@ -911,7 +911,7 @@ function ContactPage() {
   };
 
   return (
-    <main className="pt-28 pb-20 lg:pb-0">
+    <main className="pt-32 sm:pt-36 lg:pt-40 pb-20 lg:pb-0">
       <section className="py-16 bg-primary text-primary-foreground">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl lg:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
