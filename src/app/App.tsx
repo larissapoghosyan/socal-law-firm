@@ -67,17 +67,27 @@ export default function App() {
   }, [currentPageState]);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+// Helper function to calculate SHA-256 hash of a string
+async function sha256Hex(message: string): Promise<string> {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem("socal_auth_granted") === "true";
   });
   const [passcodeAttempt, setPasscodeAttempt] = useState("");
   const [passcodeError, setPasscodeError] = useState("");
 
-  const CORRECT_PASSCODE = import.meta.env.VITE_SITE_PASSCODE || "socal2026";
+  // Cryptographic SHA-256 Hash of the passcode (Original raw string is completely removed from source code)
+  const EXPECTED_HASH = import.meta.env.VITE_SITE_PASSCODE_HASH || "1e03246bbda12e2ac8d4c1cd3fb1bd89dcd10ee27bd940f5be19e134377d2560";
 
-  const handlePasscodeSubmit = (e: React.FormEvent) => {
+  const handlePasscodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passcodeAttempt.trim() === CORRECT_PASSCODE) {
+    const hash = await sha256Hex(passcodeAttempt.trim());
+    if (hash === EXPECTED_HASH) {
       localStorage.setItem("socal_auth_granted", "true");
       setIsAuthenticated(true);
       setPasscodeError("");
@@ -121,10 +131,10 @@ export default function App() {
               <div className="relative">
                 <input
                   type="password"
-                  placeholder="e.g. socal2026"
+                  placeholder="Enter Passcode"
                   value={passcodeAttempt}
                   onChange={(e) => setPasscodeAttempt(e.target.value)}
-                  className="w-full px-4 py-3.5 bg-slate-950/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all font-mono text-base"
+                  className="w-full px-4 py-3.5 bg-slate-950/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all text-base"
                   autoFocus
                 />
               </div>
@@ -144,13 +154,6 @@ export default function App() {
               Access Website
             </button>
           </form>
-
-          {/* Passcode Hint Box */}
-          <div className="mt-6 p-3.5 bg-slate-950/60 border border-slate-800 rounded-xl text-center">
-            <p className="text-xs text-amber-400 font-mono font-medium">
-              Demo Passcode: <span className="bg-amber-500/20 px-2 py-0.5 rounded text-white font-bold">socal2026</span>
-            </p>
-          </div>
 
           {/* Footer Info */}
           <div className="mt-8 pt-6 border-t border-slate-800/80 text-center text-xs text-slate-400 space-y-1">
