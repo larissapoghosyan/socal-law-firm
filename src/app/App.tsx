@@ -82,7 +82,7 @@ async function sha256Hex(message: string): Promise<string> {
   const [passcodeError, setPasscodeError] = useState("");
 
   // Cryptographic SHA-256 Hash of the passcode (Original raw string is completely removed from source code)
-  const EXPECTED_HASH = import.meta.env.VITE_SITE_PASSCODE_HASH || "1e03246bbda12e2ac8d4c1cd3fb1bd89dcd10ee27bd940f5be19e134377d2560";
+  const EXPECTED_HASH = import.meta.env.VITE_SITE_PASSCODE_HASH || "67a8bb5cd1a9a8d9aa2a89405861733a577d30d5aac54c8068d4e3417279e84f";
 
   const handlePasscodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
