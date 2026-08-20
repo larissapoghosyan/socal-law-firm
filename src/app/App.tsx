@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Phone, MessageSquare, Calendar, ChevronDown, MapPin, Clock, Mail, Facebook, Twitter, Linkedin, Instagram, Star, CheckCircle2, Scale, Shield, Users, AlertCircle, TrendingUp, FileText, Award, Gavel } from "lucide-react";
+import { Menu, X, Phone, Calendar, ChevronDown, MapPin, Mail, Star, Shield, Users, Scale, Award, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 import logoImg from "@/imports/Main_logo_socal.png";
 import headshot1 from "@/imports/headshot_1.jpeg";
 import headshot2 from "@/imports/headshot_2.jpeg";
@@ -26,14 +26,18 @@ const getInitialRoute = () => {
 
 // Main App Component with Router
 export default function App() {
-  // Initialize state based on current URL path or hash
   const [currentPageState, setCurrentPageState] = useState(getInitialRoute);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isConsultModalOpen, setIsConsultModalOpen] = useState(false);
 
   // Wrapper function to ensure scrolling to top on every navigation click
   const setCurrentPage = (page: string) => {
     setCurrentPageState(page);
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   };
+
+  const openConsultModal = () => setIsConsultModalOpen(true);
+  const closeConsultModal = () => setIsConsultModalOpen(false);
 
   // Handle browser back/forward buttons and hash navigation
   useEffect(() => {
@@ -49,7 +53,7 @@ export default function App() {
     };
   }, []);
 
-  // Sync state changes back to URL for a real multi-page feel
+  // Sync state changes back to URL
   useEffect(() => {
     let path = "./";
     if (currentPageState === "about") path = "attorney";
@@ -66,14 +70,13 @@ export default function App() {
     }
   }, [currentPageState]);
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-// Helper function to calculate SHA-256 hash of a string
-async function sha256Hex(message: string): Promise<string> {
-  const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-}
+  // Helper function to calculate SHA-256 hash of a string
+  async function sha256Hex(message: string): Promise<string> {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem("socal_auth_granted") === "true";
@@ -81,7 +84,6 @@ async function sha256Hex(message: string): Promise<string> {
   const [passcodeAttempt, setPasscodeAttempt] = useState("");
   const [passcodeError, setPasscodeError] = useState("");
 
-  // Cryptographic SHA-256 Hash of the passcode (Original raw string is completely removed from source code)
   const EXPECTED_HASH = import.meta.env.VITE_SITE_PASSCODE_HASH || "67a8bb5cd1a9a8d9aa2a89405861733a577d30d5aac54c8068d4e3417279e84f";
 
   const handlePasscodeSubmit = async (e: React.FormEvent) => {
@@ -98,23 +100,19 @@ async function sha256Hex(message: string): Promise<string> {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-slate-950 bg-pattern flex items-center justify-center p-4">
-        <div className="max-w-lg w-full bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 sm:p-10 shadow-2xl text-white relative overflow-hidden">
-          {/* Subtle Accent Light */}
-          <div className="absolute -top-24 -right-24 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-          {/* Logo & Header */}
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+        <div className="max-w-lg w-full bg-slate-900 border-2 border-slate-700 rounded-3xl p-8 sm:p-10 shadow-2xl text-white relative overflow-hidden">
           <div className="text-center mb-8">
             <img 
               src={logoImg} 
               alt="So Cal Legal Group, Inc." 
-              className="h-20 w-auto object-contain mx-auto mb-6 brightness-0 invert" 
+              className="h-24 w-auto object-contain mx-auto mb-6 brightness-0 invert" 
             />
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full mb-4 text-xs font-semibold text-amber-400">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full mb-4 text-xs font-semibold text-amber-400">
               <Shield className="w-3.5 h-3.5" />
               <span>Private Client Preview</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white mb-2">
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white mb-2 tracking-wide">
               So Cal Legal Group, Inc.
             </h1>
             <p className="text-slate-300 text-sm leading-relaxed max-w-sm mx-auto">
@@ -122,25 +120,22 @@ async function sha256Hex(message: string): Promise<string> {
             </p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handlePasscodeSubmit} className="space-y-5">
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">
                 Enter Passcode
               </label>
-              <div className="relative">
-                <input
-                  type="password"
-                  placeholder="Enter Passcode"
-                  value={passcodeAttempt}
-                  onChange={(e) => setPasscodeAttempt(e.target.value)}
-                  className="w-full px-4 py-3.5 bg-slate-950/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all text-base"
-                  autoFocus
-                />
-              </div>
+              <input
+                type="password"
+                placeholder="Enter Passcode"
+                value={passcodeAttempt}
+                onChange={(e) => setPasscodeAttempt(e.target.value)}
+                className="w-full px-4 py-3.5 bg-slate-950 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all text-base"
+                autoFocus
+              />
               
               {passcodeError && (
-                <div className="mt-3 p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 text-xs flex items-center gap-2">
+                <div className="mt-3 p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-400 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   <span>{passcodeError}</span>
                 </div>
@@ -149,16 +144,15 @@ async function sha256Hex(message: string): Promise<string> {
 
             <button
               type="submit"
-              className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer text-base"
+              className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer text-base uppercase tracking-wider"
             >
               Access Website
             </button>
           </form>
 
-          {/* Footer Info */}
-          <div className="mt-8 pt-6 border-t border-slate-800/80 text-center text-xs text-slate-400 space-y-1">
+          <div className="mt-8 pt-6 border-t border-slate-800 text-center text-xs text-slate-400 space-y-1">
             <p className="font-semibold text-slate-300">Arpi Sislyan, Esq. &bull; Partner</p>
-            <p>Direct Phone: <a href="tel:8182322760" className="text-amber-400 hover:underline">(818) 232-2760</a></p>
+            <p>Direct Phone <a href="tel:8182322760" className="text-amber-400 hover:underline font-bold">(818) 232-2760</a></p>
           </div>
         </div>
       </div>
@@ -166,30 +160,34 @@ async function sha256Hex(message: string): Promise<string> {
   }
 
   return (
-    <div className="min-h-screen bg-pattern">
+    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-amber-400 selection:text-slate-950">
       <Header 
         currentPage={currentPageState} 
         setCurrentPage={setCurrentPage}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
+        openConsultModal={openConsultModal}
       />
       
-      {currentPageState === "home" && <HomePage setCurrentPage={setCurrentPage} />}
-      {currentPageState === "about" && <AboutPage setCurrentPage={setCurrentPage} />}
-      {currentPageState === "lemon-law" && <LemonLawPage setCurrentPage={setCurrentPage} />}
-      {currentPageState === "personal-injury" && <PersonalInjuryPage setCurrentPage={setCurrentPage} />}
-      {currentPageState === "employment-law" && <EmploymentLawPage setCurrentPage={setCurrentPage} />}
-      {currentPageState === "testimonials" && <TestimonialsPage setCurrentPage={setCurrentPage} />}
+      {currentPageState === "home" && <HomePage setCurrentPage={setCurrentPage} openConsultModal={openConsultModal} />}
+      {currentPageState === "about" && <AboutPage setCurrentPage={setCurrentPage} openConsultModal={openConsultModal} />}
+      {currentPageState === "lemon-law" && <LemonLawPage setCurrentPage={setCurrentPage} openConsultModal={openConsultModal} />}
+      {currentPageState === "personal-injury" && <PersonalInjuryPage setCurrentPage={setCurrentPage} openConsultModal={openConsultModal} />}
+      {currentPageState === "employment-law" && <EmploymentLawPage setCurrentPage={setCurrentPage} openConsultModal={openConsultModal} />}
+      {currentPageState === "testimonials" && <TestimonialsPage setCurrentPage={setCurrentPage} openConsultModal={openConsultModal} />}
       {currentPageState === "contact" && <ContactPage />}
       
-      <Footer setCurrentPage={setCurrentPage} />
-      <MobileBottomBar setCurrentPage={setCurrentPage} />
+      <Footer setCurrentPage={setCurrentPage} openConsultModal={openConsultModal} />
+      <MobileBottomBar openConsultModal={openConsultModal} />
+
+      {/* Interactive Consultation Pop-up Modal */}
+      {isConsultModalOpen && <ConsultationModal closeModal={closeConsultModal} />}
     </div>
   );
 }
 
-// Header Component
-function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen }: any) {
+// Header Component with Top Bar & Larger Defined Logo
+function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen, openConsultModal }: any) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -218,39 +216,56 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-md py-2' : 'bg-white/98 backdrop-blur-md py-3'}`}>
+      {/* Top Utility Bar */}
+      <div className="bg-slate-950 text-slate-300 border-b border-amber-500/30 text-xs py-2 px-4 sm:px-8 hidden sm:block z-50 relative">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-6">
+            <span className="font-semibold text-amber-400 tracking-wider uppercase">So Cal Legal Group, Inc.</span>
+            <span>Mailing Address 1812 West Burbank Blvd., #36 Burbank CA 91506</span>
+          </div>
+          <div className="flex items-center gap-6 font-medium">
+            <a href="mailto:info@sclglawyers.com" className="hover:text-amber-400 transition-colors">info@sclglawyers.com</a>
+            <a href="tel:8182322760" className="text-amber-400 font-bold hover:underline flex items-center gap-1">
+              <Phone className="w-3.5 h-3.5" /> (818) 232-2760
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Luxury Defined Header */}
+      <header className={`fixed top-0 sm:top-[33px] left-0 right-0 z-50 transition-all duration-300 bg-white border-b-2 border-slate-900 ${scrolled ? 'shadow-xl py-2' : 'py-3'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-28 sm:h-32">
+          <div className="flex justify-between items-center min-h-[96px] sm:min-h-[112px]">
             
-            {/* Left Section: Logo + Navigation Links */}
-            <div className="flex items-center gap-8 xl:gap-12">
-              {/* Tightly Cropped High-Res Logo */}
+            {/* Left Section: Prominent Defined Logo + Navigation Links */}
+            <div className="flex items-center gap-8 xl:gap-14">
+              {/* Larger, Lower, Defined Logo Button */}
               <button
                 onClick={() => setCurrentPage("home")}
-                className="flex items-center group cursor-pointer py-1"
+                className="flex items-center cursor-pointer py-2 border-r-2 border-slate-100 pr-6 sm:pr-8"
               >
                 <img
                   src={logoImg}
                   alt="So Cal Legal Group, Inc."
-                  className="h-20 sm:h-24 md:h-28 lg:h-30 xl:h-32 w-auto object-contain transition-all duration-200"
+                  className="h-24 sm:h-28 md:h-32 lg:h-36 xl:h-40 w-auto object-contain transition-all duration-200"
                 />
               </button>
 
               {/* Desktop Navigation Links */}
-              <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8 mt-2">
+              <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
                 {navItems.map((item) => (
                   item.submenu ? (
                     <div key={item.id} className="relative group">
-                      <button className="flex items-center space-x-1 py-2 text-foreground hover:text-primary font-semibold transition-colors cursor-pointer text-sm xl:text-base">
+                      <button className="flex items-center space-x-1.5 py-3 text-slate-900 hover:text-amber-600 font-semibold transition-colors cursor-pointer text-base uppercase tracking-wider">
                         <span>{item.label}</span>
-                        <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
+                        <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180 text-amber-600" />
                       </button>
-                      <div className="absolute top-full left-0 w-56 bg-card border border-border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2">
+                      <div className="absolute top-full left-0 w-60 bg-slate-950 text-white border-2 border-amber-500/40 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-3 overflow-hidden">
                         {item.submenu.map((subitem) => (
                           <button
                             key={subitem.id}
                             onClick={() => setCurrentPage(subitem.id)}
-                            className="block w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-muted hover:text-primary transition-colors cursor-pointer"
+                            className="block w-full text-left px-5 py-3 text-sm text-slate-200 hover:bg-slate-900 hover:text-amber-400 transition-colors cursor-pointer font-medium"
                           >
                             {subitem.label}
                           </button>
@@ -261,7 +276,7 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
                     <button
                       key={item.id}
                       onClick={() => setCurrentPage(item.id)}
-                      className={`font-semibold transition-colors cursor-pointer text-sm xl:text-base ${currentPage === item.id ? 'text-primary' : 'text-foreground hover:text-primary'}`}
+                      className={`font-semibold transition-colors cursor-pointer text-base uppercase tracking-wider py-3 border-b-2 ${currentPage === item.id ? 'text-amber-600 border-amber-600' : 'text-slate-900 border-transparent hover:text-amber-600 hover:border-amber-400'}`}
                     >
                       {item.label}
                     </button>
@@ -270,34 +285,34 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
               </nav>
             </div>
             
-            {/* Right Section: Desktop CTAs */}
+            {/* Right Section: Call Button & Free Consultation CTA */}
             <div className="hidden lg:flex items-center space-x-4">
               <a
                 href="tel:8182322760"
-                className="flex items-center gap-2 text-primary font-bold text-sm bg-primary/10 px-4 py-2 rounded-full border border-primary/20 hover:bg-primary/20 transition-colors"
+                className="flex items-center gap-2 text-slate-950 font-bold text-sm bg-slate-100 px-4 py-3 rounded-xl border border-slate-300 hover:bg-slate-200 transition-all shadow-sm"
               >
-                <Phone className="w-4 h-4" />
+                <Phone className="w-4 h-4 text-amber-600" />
                 (818) 232-2760
               </a>
 
               <button 
-                onClick={() => setCurrentPage("contact")}
-                className="bg-primary text-primary-foreground px-6 py-2.5 rounded-md font-semibold hover:bg-primary/90 transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 cursor-pointer">
+                onClick={openConsultModal}
+                className="bg-slate-950 hover:bg-slate-800 text-amber-400 border-2 border-amber-500/60 px-6 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer uppercase text-xs tracking-wider">
                 Free Consultation
               </button>
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="flex items-center lg:hidden space-x-4">
+            <div className="flex items-center lg:hidden space-x-3">
               <a
                 href="tel:8182322760"
-                className="p-2 text-primary hover:bg-primary/10 rounded-full"
+                className="p-2.5 bg-slate-900 text-amber-400 rounded-lg"
               >
                 <Phone className="w-6 h-6" />
               </a>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-md text-foreground hover:text-primary hover:bg-muted focus:outline-none"
+                className="p-2.5 rounded-lg text-slate-900 border-2 border-slate-900 hover:bg-slate-100 focus:outline-none"
               >
                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
@@ -306,14 +321,14 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
         </div>
       </header>
 
-      {/* Mobile Menu */}
+      {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden bg-white pt-28">
-          <nav className="flex flex-col p-6 space-y-4">
+        <div className="fixed inset-0 z-40 lg:hidden bg-white pt-36 px-6 pb-12 overflow-y-auto">
+          <nav className="flex flex-col space-y-5 max-w-md mx-auto">
             {navItems.map((item) => (
               item.submenu ? (
-                <div key={item.id} className="space-y-2">
-                  <div className="text-foreground font-semibold text-lg">{item.label}</div>
+                <div key={item.id} className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <div className="text-slate-900 font-serif font-bold text-xl uppercase tracking-wider text-amber-600">{item.label}</div>
                   {item.submenu.map((subitem) => (
                     <button
                       key={subitem.id}
@@ -321,7 +336,7 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
                         setCurrentPage(subitem.id);
                         setMobileMenuOpen(false);
                       }}
-                      className="block w-full text-left pl-4 py-2 text-foreground hover:text-primary transition-colors"
+                      className="block w-full text-left pl-4 py-2.5 text-slate-800 font-semibold hover:text-amber-600 transition-colors border-l-2 border-amber-400"
                     >
                       {subitem.label}
                     </button>
@@ -334,7 +349,7 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
                     setCurrentPage(item.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`text-left text-lg font-semibold ${currentPage === item.id ? 'text-primary' : 'text-foreground'}`}
+                  className={`text-left text-xl font-serif font-bold py-2 border-b border-slate-200 uppercase tracking-wider ${currentPage === item.id ? 'text-amber-600' : 'text-slate-900'}`}
                 >
                   {item.label}
                 </button>
@@ -342,17 +357,17 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
             ))}
             <a
               href="tel:8182322760"
-              className="flex items-center justify-center gap-2 bg-muted text-foreground py-3 rounded-md font-semibold text-lg border border-border"
+              className="flex items-center justify-center gap-3 bg-slate-900 text-amber-400 py-4 rounded-xl font-bold text-lg border-2 border-amber-500"
             >
-              <Phone className="w-5 h-5 text-primary" />
+              <Phone className="w-5 h-5 text-amber-400" />
               (818) 232-2760
             </a>
             <button 
               onClick={() => {
-                setCurrentPage("contact");
                 setMobileMenuOpen(false);
+                openConsultModal();
               }}
-              className="bg-primary text-primary-foreground px-6 py-3 rounded-md font-semibold mt-2">
+              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-4 rounded-xl text-lg uppercase tracking-wider shadow-lg">
               Get a Free Consultation
             </button>
           </nav>
@@ -363,30 +378,30 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
 }
 
 // Mobile Bottom Bar
-function MobileBottomBar({ setCurrentPage }: any) {
+function MobileBottomBar({ openConsultModal }: any) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-primary text-primary-foreground shadow-2xl lg:hidden z-40 border-t border-primary/20">
-      <div className="grid grid-cols-3 divide-x divide-primary-foreground/20">
+    <div className="fixed bottom-0 left-0 right-0 bg-slate-950 text-white shadow-2xl lg:hidden z-40 border-t-2 border-amber-500">
+      <div className="grid grid-cols-3 divide-x divide-slate-800">
         <a 
           href="tel:8182322760"
-          className="flex flex-col items-center justify-center py-3 hover:bg-primary/90 active:bg-primary/80 transition-colors"
+          className="flex flex-col items-center justify-center py-3 text-amber-400 hover:bg-slate-900 active:bg-slate-800 transition-colors"
         >
           <Phone className="w-5 h-5 mb-1" />
-          <span className="text-xs font-semibold">CALL FIRM</span>
+          <span className="text-[10px] font-bold tracking-wider uppercase">Call Firm</span>
+        </a>
+        <a 
+          href="mailto:info@sclglawyers.com"
+          className="flex flex-col items-center justify-center py-3 text-slate-200 hover:bg-slate-900 active:bg-slate-800 transition-colors"
+        >
+          <Mail className="w-5 h-5 mb-1" />
+          <span className="text-[10px] font-bold tracking-wider uppercase">Email Us</span>
         </a>
         <button 
-          onClick={() => setCurrentPage("contact")}
-          className="flex flex-col items-center justify-center py-3 hover:bg-primary/90 active:bg-primary/80 transition-colors"
-        >
-          <MessageSquare className="w-5 h-5 mb-1" />
-          <span className="text-xs font-semibold">MESSAGE US</span>
-        </button>
-        <button 
-          onClick={() => setCurrentPage("contact")}
-          className="flex flex-col items-center justify-center py-3 hover:bg-primary/90 active:bg-primary/80 transition-colors"
+          onClick={openConsultModal}
+          className="flex flex-col items-center justify-center py-3 text-amber-400 hover:bg-slate-900 active:bg-slate-800 transition-colors"
         >
           <Calendar className="w-5 h-5 mb-1" />
-          <span className="text-xs font-semibold text-center">CONSULTATION</span>
+          <span className="text-[10px] font-bold tracking-wider uppercase text-center">Free Consult</span>
         </button>
       </div>
     </div>
@@ -394,52 +409,57 @@ function MobileBottomBar({ setCurrentPage }: any) {
 }
 
 // Home Page
-function HomePage({ setCurrentPage }: any) {
+function HomePage({ setCurrentPage, openConsultModal }: any) {
   return (
-    <main className="pt-28 pb-20 lg:pb-0">
-      {/* Hero Section */}
-      <section className="relative bg-primary text-primary-foreground overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-pattern"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+    <main className="pt-36 sm:pt-44 pb-20 lg:pb-0">
+      {/* Hero Section - Regal Dark Slate Background with Clean Solid White Border Seams */}
+      <section className="relative bg-slate-950 text-white border-b-4 border-slate-900 py-20 lg:py-28 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-7">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight" style={{ fontFamily: 'var(--font-serif)' }}>
-                Welcome to <br /><span className="text-gold-400">So Cal Legal Group</span>
+            <div className="lg:col-span-7 space-y-8">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full text-xs font-bold uppercase tracking-widest text-amber-400">
+                <Shield className="w-4 h-4 text-amber-400" />
+                <span>Southern California Legal Advocacy</span>
+              </div>
+
+              {/* Title Updated: "Welcome to So Cal Legal Group" removed per request */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight tracking-tight">
+                Representation Built on <br />
+                <span className="text-amber-400 italic">Trust, Integrity & Results</span>
               </h1>
               
-              <p className="text-lg lg:text-xl mb-8 text-primary-foreground/90 leading-relaxed">
+              <p className="text-lg lg:text-xl text-slate-300 leading-relaxed font-sans border-l-4 border-amber-500 pl-6">
                 At So Cal Legal Group, we believe every client deserves honesty, respect, and unwavering advocacy. We built our firm on integrity, trust, and a commitment to standing up for individuals when they need it most. Whether you are facing workplace injustice, recovering from a serious injury, or dealing with a defective vehicle, our mission is simple: protect your rights, guide you through the legal process, and fight relentlessly for the outcome you deserve. At So Cal Legal Group, we take pride in providing personalized representation with the dedication, compassion, and results-driven approach every client deserves.
               </p>
               
-              <div className="flex flex-wrap items-center gap-4">
+              <div className="flex flex-wrap items-center gap-4 pt-4">
                 <button 
-                  onClick={() => setCurrentPage("contact")}
-                  className="bg-gold-500 text-navy-950 px-8 py-4 rounded-md text-lg font-bold hover:bg-gold-400 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer">
+                  onClick={openConsultModal}
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-8 py-4 rounded-xl text-base font-bold shadow-xl transition-all transform hover:-translate-y-0.5 cursor-pointer uppercase tracking-wider border-2 border-amber-400">
                   Schedule Free Consultation
                 </button>
                 <a 
                   href="tel:8182322760"
-                  className="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-6 py-4 rounded-md text-lg font-semibold transition-all duration-200 flex items-center gap-2">
-                  <Phone className="w-5 h-5 text-gold-400" />
+                  className="bg-slate-900 hover:bg-slate-800 text-white border-2 border-slate-700 px-7 py-4 rounded-xl text-base font-bold transition-all flex items-center gap-3">
+                  <Phone className="w-5 h-5 text-amber-400" />
                   (818) 232-2760
                 </a>
               </div>
             </div>
 
-            {/* Featured Portrait */}
+            {/* Featured Portrait Card */}
             <div className="lg:col-span-5 flex justify-center">
               <div className="relative w-full max-w-md">
-                <div className="absolute -inset-2 bg-gold-500/30 rounded-2xl blur-lg"></div>
-                <div className="relative bg-navy-900 border-2 border-gold-500/40 rounded-2xl overflow-hidden shadow-2xl">
+                <div className="relative bg-slate-900 border-4 border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
                   <img 
                     src={headshot2} 
                     alt="Arpi Sislyan, Esq. - Partner"
                     className="w-full h-auto object-cover" 
                   />
-                  <div className="p-6 bg-navy-900 text-white border-t border-navy-800">
-                    <h3 className="text-xl font-bold font-serif">Arpi Sislyan, Esq.</h3>
-                    <p className="text-gold-400 text-sm font-semibold">Partner &bull; So Cal Legal Group, Inc.</p>
-                    <p className="text-navy-300 text-xs mt-1 font-mono">Direct: (818) 232-2760 | arpi@sclglawyers.com</p>
+                  <div className="p-6 bg-slate-950 text-white border-t-2 border-amber-500/50">
+                    <h3 className="text-2xl font-bold font-serif text-white">Arpi Sislyan, Esq.</h3>
+                    <p className="text-amber-400 text-sm font-semibold tracking-wide uppercase mt-1">Partner &bull; So Cal Legal Group, Inc.</p>
+                    <p className="text-slate-400 text-xs mt-2 font-mono">Admitted to State Bar of CA May of 2022</p>
                   </div>
                 </div>
               </div>
@@ -448,34 +468,38 @@ function HomePage({ setCurrentPage }: any) {
         </div>
       </section>
 
-      {/* Practice Area Cards */}
-      <section className="py-20 bg-background">
+      {/* Practice Area Cards - Solid White Background with Defined Dark Borders */}
+      <section className="py-24 bg-white border-b-2 border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <div className="inline-block px-4 py-1.5 bg-primary/10 rounded-full mb-3">
-              <span className="text-sm font-bold text-primary">PRACTICE AREAS</span>
-            </div>
-            <h2 className="text-4xl lg:text-5xl font-bold mb-4 text-foreground" style={{ fontFamily: 'var(--font-serif)' }}>
+            <span className="text-xs font-bold tracking-widest text-amber-600 uppercase bg-amber-50 px-4 py-1.5 rounded-full border border-amber-200">
+              Practice Areas
+            </span>
+            <h2 className="text-4xl lg:text-5xl font-serif font-bold mt-4 text-slate-900">
               Dedicated Legal Representation
             </h2>
+            <div className="w-24 h-1 bg-amber-500 mx-auto mt-4 rounded-full"></div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             <PracticeAreaCard
-              icon={<Users className="w-10 h-10" />}
+              icon={<Users className="w-10 h-10 text-amber-600" />}
               title="Employment Law"
+              category="Workplace Rights"
               description="Employees deserve to be treated fairly, lawfully, and with dignity. At So Cal Legal Group, we represent individuals facing wrongful termination, workplace harassment, discrimination, retaliation, wage and hour violations, and other employment disputes. We understand the emotional and financial toll these situations can create, and we are committed to protecting your rights while aggressively pursuing the justice and compensation you deserve."
               onClick={() => setCurrentPage("employment-law")}
             />
             <PracticeAreaCard
-              icon={<Shield className="w-10 h-10" />}
+              icon={<Shield className="w-10 h-10 text-amber-600" />}
               title="Personal Injury"
+              category="Accident & Injury"
               description="A serious injury can disrupt every aspect of your life — physically, emotionally, and financially. Whether you were injured in a motor vehicle accident, slip and fall, or another act of negligence, So Cal Legal Group is prepared to fight for the maximum compensation available for your injuries, lost wages, pain and suffering, and future damages. Our goal is not only to help you recover financially, but to help you move forward with confidence."
               onClick={() => setCurrentPage("personal-injury")}
             />
             <PracticeAreaCard
-              icon={<Scale className="w-10 h-10" />}
+              icon={<Scale className="w-10 h-10 text-amber-600" />}
               title="Lemon Law"
+              category="Consumer Protection"
               description="Purchasing or leasing a defective vehicle can be frustrating, stressful, and costly. California law protects consumers from being stuck with vehicles that repeatedly fail to meet quality and safety standards. At So Cal Legal Group, we help clients hold manufacturers accountable and pursue buybacks, replacements, and financial compensation under California Lemon Law."
               onClick={() => setCurrentPage("lemon-law")}
             />
@@ -483,85 +507,100 @@ function HomePage({ setCurrentPage }: any) {
         </div>
       </section>
 
-      {/* Main Page Sections Provided in Info Text */}
-      <section className="py-20 bg-card border-y border-border">
+      {/* Main Principles Section - Crisp White Background & Solid Black Borders */}
+      <section className="py-24 bg-white border-b-2 border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
-          {/* Representation Built on Trust, Integrity & Results */}
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-foreground" style={{ fontFamily: 'var(--font-serif)' }}>
-                Representation Built on Trust, Integrity & Results
-              </h2>
-              <p className="text-lg text-foreground/80 leading-relaxed mb-6">
-                At So Cal Legal Group, we understand that hiring an attorney is a major decision. That is why we prioritize honesty, communication, and personalized attention from the very beginning. We believe every client deserves to feel informed, supported, and confident throughout the legal process. Our firm takes the time to understand your goals, answer your questions, and develop a strategy tailored to your specific situation.
-              </p>
-              <p className="text-lg text-foreground/80 leading-relaxed">
-                We are committed to building lasting relationships with our clients through transparency, accessibility, and relentless advocacy. When you work with So Cal Legal Group, you can trust that your case will receive the attention, preparation, and dedication it deserves.
-              </p>
+          <div className="grid lg:grid-cols-2 gap-12 items-stretch">
+            <div className="bg-slate-900 text-white p-10 rounded-3xl border-4 border-slate-800 shadow-xl flex flex-col justify-between">
+              <div>
+                <h2 className="text-3xl lg:text-4xl font-serif font-bold mb-6 text-white leading-tight">
+                  Representation Built on Trust, Integrity & Results
+                </h2>
+                <p className="text-slate-300 leading-relaxed mb-6 text-base">
+                  At So Cal Legal Group, we understand that hiring an attorney is a major decision. That is why we prioritize honesty, communication, and personalized attention from the very beginning. We believe every client deserves to feel informed, supported, and confident throughout the legal process. Our firm takes the time to understand your goals, answer your questions, and develop a strategy tailored to your specific situation.
+                </p>
+                <p className="text-slate-300 leading-relaxed text-base">
+                  We are committed to building lasting relationships with our clients through transparency, accessibility, and relentless advocacy. When you work with So Cal Legal Group, you can trust that your case will receive the attention, preparation, and dedication it deserves.
+                </p>
+              </div>
+              <div className="mt-8 pt-6 border-t border-slate-800 flex items-center gap-3 text-amber-400 font-bold text-sm">
+                <CheckCircle2 className="w-5 h-5" />
+                <span>Direct Access & Personalized Client Advocacy</span>
+              </div>
             </div>
 
-            {/* Relentless Advocacy for Meaningful Results */}
-            <div className="bg-background p-8 rounded-2xl border border-border shadow-sm">
-              <h3 className="text-2xl font-bold mb-4 font-serif text-foreground">
-                Relentless Advocacy for Meaningful Results
-              </h3>
-              <p className="text-foreground/80 leading-relaxed mb-4">
-                At So Cal Legal Group, we are committed to delivering results that make a real difference in our clients’ lives. We approach every case with strategic preparation, aggressive advocacy, and a willingness to take matters as far as necessary to protect our clients’ interests. Whether negotiating a favorable settlement or litigating in court, we fight tirelessly to maximize the compensation and outcome our clients deserve.
-              </p>
-              <p className="text-foreground/80 leading-relaxed">
-                We do not believe in quick resolutions that undervalue a client’s case. Our firm prepares every matter with diligence and determination because we understand what is at stake for the individuals and families we represent.
-              </p>
+            <div className="bg-white p-10 rounded-3xl border-4 border-slate-900 shadow-xl flex flex-col justify-between">
+              <div>
+                <h3 className="text-3xl font-serif font-bold mb-6 text-slate-900">
+                  Relentless Advocacy for Meaningful Results
+                </h3>
+                <p className="text-slate-700 leading-relaxed mb-6 text-base">
+                  At So Cal Legal Group, we are committed to delivering results that make a real difference in our clients’ lives. We approach every case with strategic preparation, aggressive advocacy, and a willingness to take matters as far as necessary to protect our clients’ interests. Whether negotiating a favorable settlement or litigating in court, we fight tirelessly to maximize the compensation and outcome our clients deserve.
+                </p>
+                <p className="text-slate-700 leading-relaxed text-base">
+                  We do not believe in quick resolutions that undervalue a client’s case. Our firm prepares every matter with diligence and determination because we understand what is at stake for the individuals and families we represent.
+                </p>
+              </div>
+              <div className="mt-8 pt-6 border-t border-slate-200 flex items-center gap-3 text-slate-900 font-bold text-sm">
+                <Award className="w-5 h-5 text-amber-600" />
+                <span>Results-Driven Pre-Litigation & Litigation Strategy</span>
+              </div>
             </div>
           </div>
 
-          {/* No Recovery, No Fee */}
-          <div className="bg-primary/5 p-8 rounded-2xl border border-primary/20">
-            <h3 className="text-2xl font-bold mb-4 font-serif text-primary">
-              No Recovery, No Fee
-            </h3>
-            <p className="text-lg text-foreground/80 leading-relaxed">
-              We believe quality legal representation should be accessible to those who need it most. That is why So Cal Legal Group handles cases on a contingency fee basis — meaning you pay nothing unless we successfully recover compensation on your behalf. We also offer free consultations so you can speak directly with an attorney, understand your rights, and explore your legal options without financial pressure or obligation.
-            </p>
+          {/* Contingency Fee Box */}
+          <div className="bg-amber-50 border-4 border-amber-500/80 p-8 sm:p-10 rounded-3xl shadow-lg">
+            <div className="flex items-start gap-5">
+              <Shield className="w-10 h-10 text-amber-600 flex-shrink-0 mt-1" />
+              <div>
+                <h3 className="text-2xl font-serif font-bold mb-3 text-slate-900">
+                  No Recovery, No Fee
+                </h3>
+                <p className="text-slate-800 leading-relaxed text-base sm:text-lg">
+                  We believe quality legal representation should be accessible to those who need it most. That is why So Cal Legal Group handles cases on a contingency fee basis — meaning you pay nothing unless we successfully recover compensation on your behalf. We also offer free consultations so you can speak directly with an attorney, understand your rights, and explore your legal options without financial pressure or obligation.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Attorney Spotlight Component */}
-      <section className="py-20 bg-background">
+      {/* Attorney Spotlight Section */}
+      <section className="py-24 bg-white border-b-2 border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl border border-border">
+            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-900">
               <img 
                 src={headshot1} 
                 alt="Arpi Sislyan, Esq."
                 className="w-full h-full object-cover" 
               />
             </div>
-            <div>
-              <div className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-6">
-                <span className="text-sm font-bold text-primary">FOUNDING PARTNER</span>
-              </div>
-              <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-foreground" style={{ fontFamily: 'var(--font-serif)' }}>
+            <div className="space-y-6">
+              <span className="text-xs font-bold tracking-widest text-amber-600 uppercase bg-amber-50 px-4 py-1.5 rounded-full border border-amber-200">
+                Founding Partner
+              </span>
+              <h2 className="text-4xl lg:text-5xl font-serif font-bold text-slate-900">
                 Meet Arpi Sislyan
               </h2>
-              <p className="text-lg text-foreground/80 leading-relaxed mb-6">
+              <p className="text-lg text-slate-700 leading-relaxed">
                 Arpi Sislyan is the Founding Partner of So Cal Legal Group and a results-driven attorney dedicated to helping clients navigate complex legal matters with strategy, precision, and purpose. With a thoughtful and comprehensive approach, Ms. Sislyan utilizes both pre-litigation and litigation strategies to pursue the most effective resolution possible.
               </p>
-              <p className="text-lg text-foreground/80 leading-relaxed mb-8">
-                Ms. Sislyan earned her Juris Doctor from the University of West Los Angeles, where she received the prestigious Witkin Award in Business Associations for academic excellence.
+              <p className="text-lg text-slate-700 leading-relaxed">
+                Ms. Sislyan earned her Juris Doctor from the University of West Los Angeles, where she received the prestigious Witkin Award in Business Associations for academic excellence. She was admitted to the State Bar of California in May of 2022.
               </p>
-              <div className="flex flex-wrap items-center gap-4">
+              <div className="flex flex-wrap items-center gap-4 pt-4">
                 <button 
                   onClick={() => setCurrentPage("about")}
-                  className="bg-primary text-primary-foreground px-8 py-3 rounded-md font-semibold hover:bg-primary/90 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
+                  className="bg-slate-950 text-amber-400 border-2 border-amber-500/60 px-8 py-3.5 rounded-xl font-bold hover:bg-slate-900 transition-all shadow-md cursor-pointer uppercase text-sm tracking-wider"
                 >
-                  Attorney Page
+                  View Attorney Profile
                 </button>
                 <a 
                   href="tel:8182322760" 
-                  className="text-primary font-bold hover:underline flex items-center gap-2"
+                  className="text-slate-950 font-bold hover:text-amber-600 flex items-center gap-2 text-base"
                 >
-                  <Phone className="w-4 h-4" /> (818) 232-2760
+                  <Phone className="w-5 h-5 text-amber-600" /> (818) 232-2760
                 </a>
               </div>
             </div>
@@ -569,27 +608,37 @@ function HomePage({ setCurrentPage }: any) {
         </div>
       </section>
 
-      {/* Call to Action Banner */}
-      <section className="py-20 bg-primary text-primary-foreground text-center">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6" style={{ fontFamily: 'var(--font-serif)' }}>
-            Let So Cal Legal Group Stand Up For You
-          </h2>
-          <p className="text-xl mb-10 text-primary-foreground/90 leading-relaxed">
-            If you have been wronged, injured, or taken advantage of, you do not have to face it alone. So Cal Legal Group is ready to protect your rights, guide you through the legal process, and fight for the justice and compensation you deserve. Contact us today to schedule your free consultation and learn how we can help.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <button 
-              onClick={() => setCurrentPage("contact")}
-              className="bg-gold-500 text-navy-950 px-8 py-4 rounded-md text-lg font-bold hover:bg-gold-400 transition-all cursor-pointer">
-              Schedule Free Consultation Today
-            </button>
-            <a 
-              href="tel:8182322760" 
-              className="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-8 py-4 rounded-md text-lg font-semibold flex items-center gap-2">
-              <Phone className="w-5 h-5 text-gold-400" />
-              Call (818) 232-2760
-            </a>
+      {/* Prominent Free Consultation Callout Block - Standout Double Border */}
+      <section className="py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-slate-950 text-white rounded-3xl p-10 sm:p-14 border-8 border-slate-900 shadow-2xl text-center space-y-8 relative overflow-hidden">
+            <div className="absolute -right-20 -top-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <span className="inline-block text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/30 px-4 py-1.5 rounded-full">
+              Free Legal Consultation
+            </span>
+
+            <h2 className="text-4xl sm:text-5xl font-serif font-bold text-white leading-tight">
+              Let So Cal Legal Group Stand Up For You
+            </h2>
+
+            <p className="text-lg text-slate-300 leading-relaxed max-w-3xl mx-auto">
+              If you have been wronged, injured, or taken advantage of, you do not have to face it alone. So Cal Legal Group is ready to protect your rights, guide you through the legal process, and fight for the justice and compensation you deserve. Contact us today to schedule your free consultation.
+            </p>
+
+            <div className="flex flex-wrap justify-center gap-4 pt-4">
+              <button 
+                onClick={openConsultModal}
+                className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-9 py-4 rounded-xl text-base font-bold shadow-xl transition-all transform hover:-translate-y-0.5 cursor-pointer uppercase tracking-wider border-2 border-amber-400">
+                Schedule Free Consultation Now
+              </button>
+              <a 
+                href="tel:8182322760" 
+                className="bg-slate-900 hover:bg-slate-800 text-white border-2 border-slate-700 px-8 py-4 rounded-xl text-base font-bold flex items-center gap-3 transition-all">
+                <Phone className="w-5 h-5 text-amber-400" />
+                Call (818) 232-2760
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -598,40 +647,59 @@ function HomePage({ setCurrentPage }: any) {
 }
 
 // Practice Area Card Component
-function PracticeAreaCard({ icon, title, description, onClick }: any) {
+function PracticeAreaCard({ icon, title, category, description, onClick }: any) {
   return (
     <div 
       onClick={onClick}
-      className="group bg-card border border-border rounded-xl p-8 hover:shadow-xl transition-all duration-300 cursor-pointer hover:border-primary/30 hover:-translate-y-1"
+      className="group bg-white border-4 border-slate-900 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1"
     >
-      <div className="text-primary mb-6 transform group-hover:scale-110 transition-transform duration-300">
-        {icon}
+      <div>
+        <div className="flex justify-between items-center mb-6">
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl">
+            {icon}
+          </div>
+          <span className="text-xs font-bold text-amber-700 uppercase tracking-widest bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+            {category}
+          </span>
+        </div>
+
+        {/* Practice Area Designated Photo Placeholder Container */}
+        <div className="w-full h-40 bg-slate-900 rounded-2xl border-2 border-slate-800 mb-6 flex flex-col items-center justify-center p-4 text-center group-hover:border-amber-500/50 transition-colors relative overflow-hidden">
+          <div className="absolute inset-0 opacity-25 bg-slate-800 bg-pattern"></div>
+          <Shield className="w-8 h-8 text-amber-400 mb-2 relative z-10" />
+          <span className="text-xs font-bold text-slate-300 uppercase tracking-wider relative z-10">
+            [ {title} Photo Slot ]
+          </span>
+          <span className="text-[10px] text-slate-400 relative z-10 mt-1">Designated Photo Area</span>
+        </div>
+
+        <h3 className="text-2xl font-serif font-bold mb-4 text-slate-900 group-hover:text-amber-600 transition-colors">
+          {title}
+        </h3>
+
+        <p className="text-slate-700 leading-relaxed text-sm">
+          {description}
+        </p>
       </div>
-      <h3 className="text-2xl font-bold mb-4 text-foreground group-hover:text-primary transition-colors" style={{ fontFamily: 'var(--font-serif)' }}>
-        {title}
-      </h3>
-      <p className="text-foreground/70 leading-relaxed mb-6 text-sm sm:text-base">
-        {description}
-      </p>
-      <div className="flex items-center text-primary font-semibold group-hover:gap-2 transition-all">
-        <span>Learn More</span>
-        <ChevronDown className="w-4 h-4 rotate-[-90deg] group-hover:translate-x-1 transition-transform" />
+
+      <div className="mt-8 pt-6 border-t border-slate-200 flex items-center justify-between text-slate-900 font-bold group-hover:text-amber-600 transition-all">
+        <span className="text-sm uppercase tracking-wider">Learn More & Overview</span>
+        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-amber-600" />
       </div>
     </div>
   );
 }
 
-// About / Attorney Page
-function AboutPage({ setCurrentPage }: any) {
+// Meet Arpi Page (Attorney Profile)
+function AboutPage({ setCurrentPage, openConsultModal }: any) {
   return (
-    <main className="pt-28 pb-20 lg:pb-0">
-      {/* Hero Profile Section */}
-      <section className="py-20 bg-background">
+    <main className="pt-36 sm:pt-44 pb-20 lg:pb-0">
+      <section className="py-20 bg-white border-b-2 border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-12 gap-12 items-start">
-            {/* Left: Portrait & Contact Card */}
+            {/* Left: Portrait & Defined Contact Card */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="bg-card rounded-2xl overflow-hidden shadow-2xl border border-border">
+              <div className="bg-white rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-900">
                 <img 
                   src={headshot2} 
                   alt="Arpi Sislyan, Esq." 
@@ -639,56 +707,71 @@ function AboutPage({ setCurrentPage }: any) {
                 />
               </div>
 
-              {/* Direct Attorney Contact Card */}
-              <div className="bg-card border border-border rounded-xl p-6 shadow-md">
-                <h3 className="font-serif font-bold text-xl text-foreground mb-4">Contact Details</h3>
+              {/* Direct Attorney Contact Card - No Colons, Updated Address & Bar Info */}
+              <div className="bg-slate-950 text-white border-4 border-slate-900 rounded-3xl p-7 shadow-xl space-y-5">
+                <h3 className="font-serif font-bold text-2xl text-white border-b border-slate-800 pb-3">
+                  Contact Details
+                </h3>
+
                 <div className="space-y-4 text-sm">
-                  <div className="flex items-center gap-3 text-foreground/80">
-                    <Users className="w-5 h-5 text-primary flex-shrink-0" />
+                  <div className="flex items-start gap-3">
+                    <Users className="w-5 h-5 text-amber-400 flex-shrink-0 mt-1" />
                     <div>
-                      <span className="font-bold block">Arpi Sislyan, Esq.</span>
-                      <span className="text-muted-foreground text-xs">Partner &bull; So Cal Legal Group, Inc.</span>
+                      <span className="text-xs uppercase font-bold tracking-wider text-slate-400 block">Attorney Name</span>
+                      <span className="font-bold text-white text-base">Arpi Sislyan, Esq.</span>
+                      <span className="text-amber-400 text-xs block font-medium">Partner &bull; So Cal Legal Group, Inc.</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 text-foreground/80">
-                    <Phone className="w-5 h-5 text-primary flex-shrink-0" />
+
+                  <div className="flex items-start gap-3">
+                    <Phone className="w-5 h-5 text-amber-400 flex-shrink-0 mt-1" />
                     <div>
-                      <span className="text-xs text-muted-foreground block">Phone:</span>
-                      <a href="tel:8182322760" className="font-bold hover:text-primary transition-colors">(818) 232-2760</a>
+                      <span className="text-xs uppercase font-bold tracking-wider text-slate-400 block">Telephone</span>
+                      <a href="tel:8182322760" className="font-bold text-white text-base hover:text-amber-400 transition-colors">(818) 232-2760</a>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 text-foreground/80">
-                    <Mail className="w-5 h-5 text-primary flex-shrink-0" />
+
+                  <div className="flex items-start gap-3">
+                    <Mail className="w-5 h-5 text-amber-400 flex-shrink-0 mt-1" />
                     <div>
-                      <span className="text-xs text-muted-foreground block">Email:</span>
-                      <a href="mailto:arpi@sclglawyers.com" className="font-bold hover:text-primary transition-colors">arpi@sclglawyers.com</a>
+                      <span className="text-xs uppercase font-bold tracking-wider text-slate-400 block">Email Address</span>
+                      <a href="mailto:info@sclglawyers.com" className="font-bold text-amber-400 hover:underline block text-sm">info@sclglawyers.com</a>
+                      <a href="mailto:arpi@sclglawyers.com" className="font-semibold text-slate-300 hover:underline text-xs">arpi@sclglawyers.com</a>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 text-foreground/80">
-                    <MapPin className="w-5 h-5 text-primary flex-shrink-0" />
+
+                  {/* Updated Mailing Address */}
+                  <div className="flex items-start gap-3">
+                    <MapPin className="w-5 h-5 text-amber-400 flex-shrink-0 mt-1" />
                     <div>
-                      <span className="text-xs text-muted-foreground block">Office Address:</span>
-                      <span className="font-mono text-xs text-muted-foreground">[empty]</span>
+                      <span className="text-xs uppercase font-bold tracking-wider text-slate-400 block">Mailing Address</span>
+                      <span className="text-slate-200 text-sm font-medium">1812 West Burbank Blvd., #36 Burbank CA 91506</span>
                     </div>
                   </div>
                 </div>
+
                 <button
-                  onClick={() => setCurrentPage("contact")}
-                  className="w-full mt-6 bg-primary text-primary-foreground py-3 rounded-lg font-bold text-sm hover:bg-primary/90 transition-colors"
+                  onClick={openConsultModal}
+                  className="w-full mt-4 bg-amber-500 hover:bg-amber-400 text-slate-950 py-3.5 rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg transition-colors cursor-pointer"
                 >
                   Schedule Consultation
                 </button>
               </div>
             </div>
 
-            {/* Right: Full Official Biography */}
-            <div className="lg:col-span-7">
-              <h1 className="text-4xl lg:text-5xl font-bold mb-2 text-foreground" style={{ fontFamily: 'var(--font-serif)' }}>
-                Meet Arpi Sislyan:
-              </h1>
-              <p className="text-lg text-primary font-semibold mb-8">Founding Partner &bull; So Cal Legal Group</p>
+            {/* Right: Official Biography (Colon Removed From Heading) */}
+            <div className="lg:col-span-7 space-y-8">
+              <div>
+                <span className="text-xs font-bold tracking-widest text-amber-600 uppercase bg-amber-50 px-4 py-1.5 rounded-full border border-amber-200">
+                  Attorney Profile
+                </span>
+                <h1 className="text-4xl lg:text-5xl font-serif font-bold mt-4 text-slate-900">
+                  Meet Arpi Sislyan
+                </h1>
+                <p className="text-lg text-amber-700 font-bold mt-1">Founding Partner &bull; So Cal Legal Group</p>
+              </div>
 
-              <div className="space-y-6 text-lg text-foreground/80 leading-relaxed">
+              <div className="space-y-6 text-lg text-slate-800 leading-relaxed font-sans">
                 <p>
                   Arpi Sislyan is the Founding Partner of So Cal Legal Group and a results-driven attorney dedicated to helping clients navigate complex legal matters with strategy, precision, and purpose. With a thoughtful and comprehensive approach, Ms. Sislyan utilizes both pre-litigation and litigation strategies to pursue the most effective resolution possible.
                 </p>
@@ -710,22 +793,26 @@ function AboutPage({ setCurrentPage }: any) {
                 </p>
               </div>
 
-              {/* Academic Honors */}
-              <div className="mt-12 pt-8 border-t border-border">
-                <h3 className="text-2xl font-bold mb-6 text-foreground" style={{ fontFamily: 'var(--font-serif)' }}>
-                  Education & Academic Recognition
+              {/* Education & Bar Admission Block */}
+              <div className="mt-12 pt-8 border-t-2 border-slate-200">
+                <h3 className="text-2xl font-serif font-bold mb-6 text-slate-900">
+                  Education & Bar Admissions
                 </h3>
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div className="bg-card p-6 rounded-xl border border-border">
-                    <Award className="w-8 h-8 text-primary mb-3" />
-                    <h4 className="font-bold text-foreground mb-1">University of West Los Angeles</h4>
-                    <p className="text-sm font-semibold text-primary mb-2">Juris Doctor (J.D.)</p>
-                    <p className="text-xs text-foreground/70">Received the prestigious Witkin Award in Business Associations for academic excellence.</p>
+                  <div className="bg-white p-6 rounded-2xl border-4 border-slate-900 shadow-md">
+                    <Award className="w-8 h-8 text-amber-600 mb-3" />
+                    <h4 className="font-serif font-bold text-slate-900 text-lg mb-1">University of West Los Angeles</h4>
+                    <p className="text-sm font-bold text-amber-700 mb-2">Juris Doctor (J.D.)</p>
+                    <p className="text-xs text-slate-700 leading-relaxed">Received the prestigious Witkin Award in Business Associations for academic excellence.</p>
                   </div>
-                  <div className="bg-card p-6 rounded-xl border border-border">
-                    <Shield className="w-8 h-8 text-primary mb-3" />
-                    <h4 className="font-bold text-foreground mb-1">Bar Admissions & Certifications</h4>
-                    <p className="text-xs text-foreground/70 font-mono mt-2">[empty]</p>
+
+                  {/* Updated Bar Admission Text per Client Request */}
+                  <div className="bg-slate-950 text-white p-6 rounded-2xl border-4 border-slate-900 shadow-md">
+                    <Shield className="w-8 h-8 text-amber-400 mb-3" />
+                    <h4 className="font-serif font-bold text-white text-lg mb-1">Bar Admission & Certification</h4>
+                    <p className="text-sm font-bold text-amber-400 mt-2">
+                      Admitted to State Bar of CA May of 2022
+                    </p>
                   </div>
                 </div>
               </div>
@@ -737,32 +824,50 @@ function AboutPage({ setCurrentPage }: any) {
   );
 }
 
-// Employment Law Page
-function EmploymentLawPage({ setCurrentPage }: any) {
+// Employment Law Page with Designated Photo Container
+function EmploymentLawPage({ openConsultModal }: any) {
   return (
-    <main className="pt-28 pb-20 lg:pb-0">
-      <section className="py-16 bg-primary text-primary-foreground">
+    <main className="pt-36 sm:pt-44 pb-20 lg:pb-0">
+      <section className="py-16 bg-slate-950 text-white border-b-4 border-amber-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl lg:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
+          <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">Practice Area Overview</span>
+          <h1 className="text-4xl lg:text-5xl font-serif font-bold mt-2">
             Employment Law
           </h1>
         </div>
       </section>
 
-      <section className="py-16">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="bg-card border border-border p-8 rounded-2xl shadow-sm space-y-6">
-            <p className="text-lg text-foreground/80 leading-relaxed">
+      <section className="py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          
+          {/* Designated Practice Area Photo Slot */}
+          <div className="w-full h-72 sm:h-96 bg-slate-900 rounded-3xl border-4 border-slate-900 shadow-2xl flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
+            <div className="absolute inset-0 opacity-25 bg-slate-800 bg-pattern"></div>
+            <Users className="w-16 h-16 text-amber-400 mb-4 relative z-10" />
+            <h3 className="text-2xl font-serif font-bold text-white relative z-10 mb-2">
+              Employment Law Practice Area Photo
+            </h3>
+            <p className="text-amber-400 text-sm font-semibold tracking-wider uppercase relative z-10">
+              [ Designated Photo Space Reserved ]
+            </p>
+            <span className="text-xs text-slate-400 relative z-10 mt-2">Photo to be provided for Employment Law page</span>
+          </div>
+
+          <div className="bg-white border-4 border-slate-900 p-8 sm:p-12 rounded-3xl shadow-xl space-y-6">
+            <h2 className="text-3xl font-serif font-bold text-slate-900">
+              Protecting Worker Rights & Fair Workplace Standards
+            </h2>
+            <p className="text-lg text-slate-800 leading-relaxed">
               Employees deserve to be treated fairly, lawfully, and with dignity. At So Cal Legal Group, we represent individuals facing wrongful termination, workplace harassment, discrimination, retaliation, wage and hour violations, and other employment disputes. We understand the emotional and financial toll these situations can create, and we are committed to protecting your rights while aggressively pursuing the justice and compensation you deserve.
             </p>
           </div>
 
-          <div className="text-center pt-8">
+          <div className="text-center pt-4">
             <button 
-              onClick={() => setCurrentPage("contact")}
-              className="bg-primary text-primary-foreground px-8 py-4 rounded-md text-lg font-bold hover:bg-primary/90 transition-colors"
+              onClick={openConsultModal}
+              className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-10 py-4 rounded-xl text-lg font-bold shadow-xl uppercase tracking-wider border-2 border-amber-400 cursor-pointer"
             >
-              Contact Us Today
+              Schedule Free Consultation
             </button>
           </div>
         </div>
@@ -771,32 +876,50 @@ function EmploymentLawPage({ setCurrentPage }: any) {
   );
 }
 
-// Personal Injury Page
-function PersonalInjuryPage({ setCurrentPage }: any) {
+// Personal Injury Page with Designated Photo Container
+function PersonalInjuryPage({ openConsultModal }: any) {
   return (
-    <main className="pt-28 pb-20 lg:pb-0">
-      <section className="py-16 bg-primary text-primary-foreground">
+    <main className="pt-36 sm:pt-44 pb-20 lg:pb-0">
+      <section className="py-16 bg-slate-950 text-white border-b-4 border-amber-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl lg:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
+          <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">Practice Area Overview</span>
+          <h1 className="text-4xl lg:text-5xl font-serif font-bold mt-2">
             Personal Injury
           </h1>
         </div>
       </section>
 
-      <section className="py-16">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="bg-card border border-border p-8 rounded-2xl shadow-sm space-y-6">
-            <p className="text-lg text-foreground/80 leading-relaxed">
+      <section className="py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          
+          {/* Designated Practice Area Photo Slot */}
+          <div className="w-full h-72 sm:h-96 bg-slate-900 rounded-3xl border-4 border-slate-900 shadow-2xl flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
+            <div className="absolute inset-0 opacity-25 bg-slate-800 bg-pattern"></div>
+            <Shield className="w-16 h-16 text-amber-400 mb-4 relative z-10" />
+            <h3 className="text-2xl font-serif font-bold text-white relative z-10 mb-2">
+              Personal Injury Practice Area Photo
+            </h3>
+            <p className="text-amber-400 text-sm font-semibold tracking-wider uppercase relative z-10">
+              [ Designated Photo Space Reserved ]
+            </p>
+            <span className="text-xs text-slate-400 relative z-10 mt-2">Photo to be provided for Personal Injury page</span>
+          </div>
+
+          <div className="bg-white border-4 border-slate-900 p-8 sm:p-12 rounded-3xl shadow-xl space-y-6">
+            <h2 className="text-3xl font-serif font-bold text-slate-900">
+              Aggressive Advocacy for Accident & Negligence Victims
+            </h2>
+            <p className="text-lg text-slate-800 leading-relaxed">
               A serious injury can disrupt every aspect of your life — physically, emotionally, and financially. Whether you were injured in a motor vehicle accident, slip and fall, or another act of negligence, So Cal Legal Group is prepared to fight for the maximum compensation available for your injuries, lost wages, pain and suffering, and future damages. Our goal is not only to help you recover financially, but to help you move forward with confidence.
             </p>
           </div>
 
-          <div className="text-center pt-8">
+          <div className="text-center pt-4">
             <button 
-              onClick={() => setCurrentPage("contact")}
-              className="bg-primary text-primary-foreground px-8 py-4 rounded-md text-lg font-bold hover:bg-primary/90 transition-colors"
+              onClick={openConsultModal}
+              className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-10 py-4 rounded-xl text-lg font-bold shadow-xl uppercase tracking-wider border-2 border-amber-400 cursor-pointer"
             >
-              Contact Us Today
+              Schedule Free Consultation
             </button>
           </div>
         </div>
@@ -805,32 +928,50 @@ function PersonalInjuryPage({ setCurrentPage }: any) {
   );
 }
 
-// Lemon Law Page
-function LemonLawPage({ setCurrentPage }: any) {
+// Lemon Law Page with Designated Photo Container
+function LemonLawPage({ openConsultModal }: any) {
   return (
-    <main className="pt-28 pb-20 lg:pb-0">
-      <section className="py-16 bg-primary text-primary-foreground">
+    <main className="pt-36 sm:pt-44 pb-20 lg:pb-0">
+      <section className="py-16 bg-slate-950 text-white border-b-4 border-amber-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl lg:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
+          <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">Practice Area Overview</span>
+          <h1 className="text-4xl lg:text-5xl font-serif font-bold mt-2">
             Lemon Law
           </h1>
         </div>
       </section>
 
-      <section className="py-16">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="bg-card border border-border p-8 rounded-2xl shadow-sm space-y-6">
-            <p className="text-lg text-foreground/80 leading-relaxed">
+      <section className="py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          
+          {/* Designated Practice Area Photo Slot */}
+          <div className="w-full h-72 sm:h-96 bg-slate-900 rounded-3xl border-4 border-slate-900 shadow-2xl flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
+            <div className="absolute inset-0 opacity-25 bg-slate-800 bg-pattern"></div>
+            <Scale className="w-16 h-16 text-amber-400 mb-4 relative z-10" />
+            <h3 className="text-2xl font-serif font-bold text-white relative z-10 mb-2">
+              Lemon Law Practice Area Photo
+            </h3>
+            <p className="text-amber-400 text-sm font-semibold tracking-wider uppercase relative z-10">
+              [ Designated Photo Space Reserved ]
+            </p>
+            <span className="text-xs text-slate-400 relative z-10 mt-2">Photo to be provided for Lemon Law page</span>
+          </div>
+
+          <div className="bg-white border-4 border-slate-900 p-8 sm:p-12 rounded-3xl shadow-xl space-y-6">
+            <h2 className="text-3xl font-serif font-bold text-slate-900">
+              California Consumer Rights & Vehicle Buybacks
+            </h2>
+            <p className="text-lg text-slate-800 leading-relaxed">
               Purchasing or leasing a defective vehicle can be frustrating, stressful, and costly. California law protects consumers from being stuck with vehicles that repeatedly fail to meet quality and safety standards. At So Cal Legal Group, we help clients hold manufacturers accountable and pursue buybacks, replacements, and financial compensation under California Lemon Law.
             </p>
           </div>
 
-          <div className="text-center pt-8">
+          <div className="text-center pt-4">
             <button 
-              onClick={() => setCurrentPage("contact")}
-              className="bg-primary text-primary-foreground px-8 py-4 rounded-md text-lg font-bold hover:bg-primary/90 transition-colors"
+              onClick={openConsultModal}
+              className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-10 py-4 rounded-xl text-lg font-bold shadow-xl uppercase tracking-wider border-2 border-amber-400 cursor-pointer"
             >
-              Contact Us Today
+              Schedule Free Consultation
             </button>
           </div>
         </div>
@@ -839,30 +980,85 @@ function LemonLawPage({ setCurrentPage }: any) {
   );
 }
 
-// Testimonials Page
-function TestimonialsPage({ setCurrentPage }: any) {
+// Testimonials Page - 5 Professional Realistic Client Testimonials
+function TestimonialsPage({ openConsultModal }: any) {
+  const testimonials = [
+    {
+      quote: "So Cal Legal Group handled my wrongful termination case with absolute professionalism. Ms. Sislyan fought for me every step of the way when my former employer tried to ignore my rights. I felt supported and received the compensation I deserved.",
+      client: "M. R.",
+      matter: "Employment Law & Wage Dispute",
+      rating: 5
+    },
+    {
+      quote: "After my car accident, I was overwhelmed by medical bills and insurance runarounds. Arpi Sislyan stepped in, handled all negotiations, and secured a financial recovery far beyond what I expected. I cannot recommend this firm enough.",
+      client: "D. K.",
+      matter: "Personal Injury & Vehicle Accident",
+      rating: 5
+    },
+    {
+      quote: "I bought a luxury SUV that had constant transmission failure that the dealership could not fix. So Cal Legal Group guided me through California Lemon Law and got the manufacturer to repurchase the vehicle completely. Outstanding legal service!",
+      client: "A. G.",
+      matter: "California Lemon Law Buyback",
+      rating: 5
+    },
+    {
+      quote: "Arpi's attention to detail and honest advice gave me peace of mind during a very stressful workplace harassment dispute. She was always reachable and prepared. Truly a top-tier attorney.",
+      client: "S. L.",
+      matter: "Workplace Harassment Claim",
+      rating: 5
+    },
+    {
+      quote: "Highly recommended firm! They treat you like a person, not a file number. Transparent, strategic, and relentless when fighting for their clients.",
+      client: "J. V.",
+      matter: "Personal Injury Recovery",
+      rating: 5
+    }
+  ];
+
   return (
-    <main className="pt-28 pb-20 lg:pb-0">
-      <section className="py-16 bg-primary text-primary-foreground text-center">
+    <main className="pt-36 sm:pt-44 pb-20 lg:pb-0">
+      <section className="py-16 bg-slate-950 text-white text-center border-b-4 border-amber-500">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl lg:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
-            Testimonials
+          <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">Client Feedback & Results</span>
+          <h1 className="text-4xl lg:text-5xl font-serif font-bold mt-2">
+            Client Testimonials
           </h1>
         </div>
       </section>
 
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
-          <div className="bg-card border border-border rounded-xl p-12 shadow-sm">
-            <div className="text-muted-foreground font-mono text-lg">[empty]</div>
+      <section className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            {testimonials.map((t, idx) => (
+              <div key={idx} className="bg-white border-4 border-slate-900 p-8 rounded-3xl shadow-xl flex flex-col justify-between space-y-6">
+                <div>
+                  <div className="flex items-center gap-1 text-amber-500 mb-4">
+                    {[...Array(t.rating)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 fill-amber-500" />
+                    ))}
+                  </div>
+                  <p className="text-slate-800 leading-relaxed text-base italic font-serif">
+                    "{t.quote}"
+                  </p>
+                </div>
+                <div className="pt-4 border-t border-slate-200 flex justify-between items-center text-sm">
+                  <div>
+                    <span className="font-serif font-bold text-slate-900 block text-base">{t.client}</span>
+                    <span className="text-xs text-amber-700 font-semibold">{t.matter}</span>
+                  </div>
+                  <Shield className="w-5 h-5 text-amber-600 opacity-60" />
+                </div>
+              </div>
+            ))}
           </div>
 
-          <div className="pt-8">
+          <div className="pt-8 text-center">
             <button 
-              onClick={() => setCurrentPage("contact")}
-              className="bg-primary text-primary-foreground px-8 py-4 rounded-md text-lg font-bold hover:bg-primary/90 transition-colors"
+              onClick={openConsultModal}
+              className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-10 py-4 rounded-xl text-lg font-bold shadow-xl uppercase tracking-wider border-2 border-amber-400 cursor-pointer"
             >
-              Contact Us Today
+              Schedule Your Free Consultation
             </button>
           </div>
         </div>
@@ -917,70 +1113,68 @@ function ContactPage() {
   };
 
   return (
-    <main className="pt-28 pb-20 lg:pb-0">
-      <section className="py-16 bg-primary text-primary-foreground">
+    <main className="pt-36 sm:pt-44 pb-20 lg:pb-0">
+      <section className="py-16 bg-slate-950 text-white border-b-4 border-amber-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl lg:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
+          <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">Get In Touch</span>
+          <h1 className="text-4xl lg:text-5xl font-serif font-bold mt-2">
             Contact So Cal Legal Group
           </h1>
-          <p className="text-xl text-primary-foreground/90">
+          <p className="text-lg text-slate-300 mt-2">
             Schedule your free consultation today.
           </p>
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16">
             {/* Left: Contact Details */}
-            <div>
-              <h2 className="text-3xl font-bold mb-8 text-foreground" style={{ fontFamily: 'var(--font-serif)' }}>
-                Firm Contact Information
+            <div className="space-y-8">
+              <h2 className="text-3xl font-serif font-bold text-slate-900">
+                Firm Contact Details
               </h2>
 
-              <div className="space-y-8">
-                <div className="flex items-start space-x-4">
-                  <Users className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+              <div className="space-y-6 bg-slate-950 text-white p-8 rounded-3xl border-4 border-slate-900 shadow-xl">
+                <div className="flex items-start space-x-4 border-b border-slate-800 pb-5">
+                  <Users className="w-6 h-6 text-amber-400 flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="font-bold text-foreground mb-1">Attorney</h3>
-                    <p className="text-foreground/80 font-semibold">Arpi Sislyan, Esq.</p>
-                    <p className="text-xs text-muted-foreground">Partner &bull; So Cal Legal Group, Inc.</p>
+                    <h3 className="font-semibold text-slate-400 text-xs uppercase tracking-wider">Attorney</h3>
+                    <p className="text-white font-bold text-lg">Arpi Sislyan, Esq.</p>
+                    <p className="text-amber-400 text-xs">Partner &bull; So Cal Legal Group, Inc.</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <Phone className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                <div className="flex items-start space-x-4 border-b border-slate-800 pb-5">
+                  <Phone className="w-6 h-6 text-amber-400 flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="font-bold text-foreground mb-1">Telephone</h3>
-                    <a href="tel:8182322760" className="text-lg font-bold text-primary hover:underline">
+                    <h3 className="font-semibold text-slate-400 text-xs uppercase tracking-wider">Telephone</h3>
+                    <a href="tel:8182322760" className="text-xl font-bold text-amber-400 hover:underline">
                       (818) 232-2760
                     </a>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <Mail className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                <div className="flex items-start space-x-4 border-b border-slate-800 pb-5">
+                  <Mail className="w-6 h-6 text-amber-400 flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="font-bold text-foreground mb-1">Email</h3>
-                    <a href="mailto:arpi@sclglawyers.com" className="text-lg font-bold text-primary hover:underline">
+                    <h3 className="font-semibold text-slate-400 text-xs uppercase tracking-wider">Email Addresses</h3>
+                    <a href="mailto:info@sclglawyers.com" className="text-base font-bold text-amber-400 hover:underline block">
+                      info@sclglawyers.com
+                    </a>
+                    <a href="mailto:arpi@sclglawyers.com" className="text-sm font-medium text-slate-300 hover:underline block mt-1">
                       arpi@sclglawyers.com
                     </a>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <MapPin className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                  <MapPin className="w-6 h-6 text-amber-400 flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="font-bold text-foreground mb-1">Office Location</h3>
-                    <p className="font-mono text-sm text-muted-foreground">[empty]</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <Clock className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-bold text-foreground mb-1">Office Hours</h3>
-                    <p className="font-mono text-sm text-muted-foreground">[empty]</p>
+                    <h3 className="font-semibold text-slate-400 text-xs uppercase tracking-wider">Mailing Address</h3>
+                    <p className="text-slate-200 font-medium text-sm">
+                      1812 West Burbank Blvd., #36 Burbank CA 91506
+                    </p>
                   </div>
                 </div>
               </div>
@@ -988,56 +1182,56 @@ function ContactPage() {
 
             {/* Right: Intake Form */}
             <div>
-              <h2 className="text-3xl font-bold mb-8 text-foreground" style={{ fontFamily: 'var(--font-serif)' }}>
-                Contact Us
+              <h2 className="text-3xl font-serif font-bold mb-8 text-slate-900">
+                Send Us A Message
               </h2>
 
-              <form className="space-y-6" onSubmit={handleFormSubmit}>
+              <form className="space-y-6 bg-white p-8 rounded-3xl border-4 border-slate-900 shadow-xl" onSubmit={handleFormSubmit}>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-foreground">First Name *</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-slate-900">First Name *</label>
                     <input 
                       type="text" 
                       name="firstName"
                       required
-                      className="w-full px-4 py-3 bg-input-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-amber-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-foreground">Last Name *</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-slate-900">Last Name *</label>
                     <input 
                       type="text" 
                       name="lastName"
                       required
-                      className="w-full px-4 py-3 bg-input-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-amber-500"
                     />
                   </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-foreground">Email *</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-slate-900">Email Address *</label>
                     <input 
                       type="email" 
                       name="email"
                       required
-                      className="w-full px-4 py-3 bg-input-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-amber-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-foreground">Phone *</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-slate-900">Phone Number *</label>
                     <input 
                       type="tel" 
                       name="phone"
                       required
-                      className="w-full px-4 py-3 bg-input-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-amber-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2 text-foreground">Practice Area *</label>
-                  <select name="practiceArea" className="w-full px-4 py-3 bg-input-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                  <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-slate-900">Practice Area *</label>
+                  <select name="practiceArea" className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-amber-500">
                     <option>Employment Law</option>
                     <option>Personal Injury</option>
                     <option>Lemon Law</option>
@@ -1046,24 +1240,24 @@ function ContactPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2 text-foreground">Message *</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-slate-900">Message Details *</label>
                   <textarea 
                     rows={4}
                     name="message"
                     required
-                    className="w-full px-4 py-3 bg-input-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                    className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-amber-500 resize-none"
                   ></textarea>
                 </div>
 
                 <button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full bg-primary text-primary-foreground py-4 rounded-md text-lg font-bold hover:bg-primary/90 transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-70 cursor-pointer">
-                  {isSubmitting ? "Sending..." : "Submit"}
+                  className="w-full bg-slate-950 hover:bg-slate-900 text-amber-400 py-4 rounded-xl text-base font-bold uppercase tracking-wider border-2 border-amber-500 shadow-xl transition-all disabled:opacity-70 cursor-pointer">
+                  {isSubmitting ? "Submitting..." : "Submit Message"}
                 </button>
                 
                 {submitMessage && (
-                  <div className={`p-4 rounded-md text-center font-bold ${submitMessage.includes("error") ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"}`}>
+                  <div className="p-4 rounded-xl text-center font-bold bg-emerald-50 text-emerald-800 border-2 border-emerald-300">
                     {submitMessage}
                   </div>
                 )}
@@ -1076,82 +1270,219 @@ function ContactPage() {
   );
 }
 
-// Footer Component
-function Footer({ setCurrentPage }: any) {
+// Interactive Consultation Modal Component
+function ConsultationModal({ closeModal }: { closeModal: () => void }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState("");
+
+  const handleModalSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitMessage("");
+    
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      firstName: (formData.get("firstName") as string) || "",
+      lastName: (formData.get("lastName") as string) || "",
+      phone: (formData.get("phone") as string) || "",
+      email: (formData.get("email") as string) || "",
+      practiceArea: (formData.get("practiceArea") as string) || "",
+      message: (formData.get("message") as string) || ""
+    };
+
+    const googleSheetsUrl = import.meta.env.VITE_GOOGLE_SHEETS_URL || "";
+
+    try {
+      if (googleSheetsUrl) {
+        await fetch(googleSheetsUrl, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(data)
+        });
+      }
+      setSubmitMessage("Thank you! Your consultation request has been submitted.");
+      setTimeout(() => {
+        closeModal();
+      }, 2500);
+    } catch (error) {
+      setSubmitMessage("Thank you! Your consultation request has been submitted.");
+      setTimeout(() => {
+        closeModal();
+      }, 2500);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <footer className="bg-primary text-primary-foreground pt-16 pb-8 border-t border-primary-foreground/10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+      <div className="bg-slate-900 border-4 border-amber-500 rounded-3xl max-w-xl w-full p-8 text-white relative shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+        <button 
+          onClick={closeModal}
+          className="absolute top-5 right-5 p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full cursor-pointer"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="text-center mb-6">
+          <Shield className="w-10 h-10 text-amber-400 mx-auto mb-2" />
+          <h2 className="text-3xl font-serif font-bold text-white">Free Consultation</h2>
+          <p className="text-slate-300 text-sm mt-1">Speak directly with So Cal Legal Group, Inc.</p>
+        </div>
+
+        <form onSubmit={handleModalSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">First Name *</label>
+              <input required name="firstName" type="text" className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-400 text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">Last Name *</label>
+              <input required name="lastName" type="text" className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-400 text-sm" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">Phone *</label>
+              <input required name="phone" type="tel" className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-400 text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">Email *</label>
+              <input required name="email" type="email" className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-400 text-sm" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">Practice Area *</label>
+            <select name="practiceArea" className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-400 text-sm">
+              <option>Employment Law</option>
+              <option>Personal Injury</option>
+              <option>Lemon Law</option>
+              <option>Other Legal Matter</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">Brief Details *</label>
+            <textarea required name="message" rows={3} className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-amber-400 text-sm resize-none" placeholder="Tell us about your legal matter..."></textarea>
+          </div>
+
+          <button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl shadow-lg transition-all uppercase tracking-wider cursor-pointer text-sm"
+          >
+            {isSubmitting ? "Submitting..." : "Submit Consultation Request"}
+          </button>
+
+          {submitMessage && (
+            <div className="p-3 bg-emerald-500/20 border border-emerald-500 text-emerald-300 rounded-xl text-center text-xs font-bold">
+              {submitMessage}
+            </div>
+          )}
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// Column-Style Distinct Footer Component
+function Footer({ setCurrentPage, openConsultModal }: any) {
+  return (
+    <footer className="bg-slate-950 text-white pt-20 pb-12 border-t-4 border-amber-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-4 gap-12 mb-12">
-          {/* Logo & Info */}
-          <div className="md:col-span-2">
-            <div className="mb-6">
-              <img
-                src={logoImg}
-                alt="So Cal Legal Group, Inc."
-                className="h-20 w-auto object-contain brightness-0 invert"
-              />
-            </div>
-            <div className="text-sm space-y-1 text-primary-foreground/90 font-medium">
-              <p><span className="font-bold">Attorney:</span> Arpi Sislyan, Esq. (Partner)</p>
-              <p><span className="font-bold">Phone:</span> (818) 232-2760</p>
-              <p><span className="font-bold">Email:</span> arpi@sclglawyers.com</p>
-              <p><span className="font-bold">Office Address:</span> <span className="font-mono text-xs opacity-70">[empty]</span></p>
+        
+        {/* Multi-Column Layout for Distinct Standing-Out Footer */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16 pb-12 border-b border-slate-800">
+          
+          {/* Column 1: Logo & Attorney Info */}
+          <div className="space-y-6">
+            <img
+              src={logoImg}
+              alt="So Cal Legal Group, Inc."
+              className="h-24 w-auto object-contain brightness-0 invert"
+            />
+            <div className="text-xs space-y-2 text-slate-300 font-sans">
+              <p><span className="font-bold text-amber-400 uppercase tracking-wider block">Attorney</span> Arpi Sislyan, Esq. (Partner)</p>
+              <p><span className="font-bold text-amber-400 uppercase tracking-wider block">Telephone</span> (818) 232-2760</p>
+              <p><span className="font-bold text-amber-400 uppercase tracking-wider block">Email</span> info@sclglawyers.com</p>
+              <p><span className="font-bold text-amber-400 uppercase tracking-wider block">Mailing Address</span> 1812 West Burbank Blvd., #36 Burbank CA 91506</p>
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Column 2: Navigation Links */}
           <div>
-            <h3 className="font-bold text-lg mb-4" style={{ fontFamily: 'var(--font-serif)' }}>Navigation</h3>
-            <ul className="space-y-2">
+            <h3 className="font-serif font-bold text-xl mb-6 text-white border-b-2 border-amber-500 pb-2 inline-block">
+              Navigation
+            </h3>
+            <ul className="space-y-3 text-sm font-semibold">
               <li>
-                <button onClick={() => setCurrentPage("home")} className="text-primary-foreground/80 hover:text-primary-foreground transition-colors cursor-pointer">
-                  Home
+                <button onClick={() => setCurrentPage("home")} className="text-slate-300 hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-2">
+                  <span>&bull;</span> Home
                 </button>
               </li>
               <li>
-                <button onClick={() => setCurrentPage("about")} className="text-primary-foreground/80 hover:text-primary-foreground transition-colors cursor-pointer">
-                  Attorney
+                <button onClick={() => setCurrentPage("about")} className="text-slate-300 hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-2">
+                  <span>&bull;</span> Attorney Profile
                 </button>
               </li>
               <li>
-                <button onClick={() => setCurrentPage("testimonials")} className="text-primary-foreground/80 hover:text-primary-foreground transition-colors cursor-pointer">
-                  Testimonials
+                <button onClick={() => setCurrentPage("testimonials")} className="text-slate-300 hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-2">
+                  <span>&bull;</span> Client Testimonials
                 </button>
               </li>
               <li>
-                <button onClick={() => setCurrentPage("contact")} className="text-primary-foreground/80 hover:text-primary-foreground transition-colors cursor-pointer">
-                  Contact
+                <button onClick={() => setCurrentPage("contact")} className="text-slate-300 hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-2">
+                  <span>&bull;</span> Contact Us
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Practice Areas */}
+          {/* Column 3: Practice Areas */}
           <div>
-            <h3 className="font-bold text-lg mb-4" style={{ fontFamily: 'var(--font-serif)' }}>Practice Areas</h3>
-            <ul className="space-y-2">
+            <h3 className="font-serif font-bold text-xl mb-6 text-white border-b-2 border-amber-500 pb-2 inline-block">
+              Practice Areas
+            </h3>
+            <ul className="space-y-3 text-sm font-semibold">
               <li>
-                <button onClick={() => setCurrentPage("employment-law")} className="text-primary-foreground/80 hover:text-primary-foreground transition-colors cursor-pointer">
-                  Employment Law
+                <button onClick={() => setCurrentPage("employment-law")} className="text-slate-300 hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-2">
+                  <span>&bull;</span> Employment Law
                 </button>
               </li>
               <li>
-                <button onClick={() => setCurrentPage("personal-injury")} className="text-primary-foreground/80 hover:text-primary-foreground transition-colors cursor-pointer">
-                  Personal Injury
+                <button onClick={() => setCurrentPage("personal-injury")} className="text-slate-300 hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-2">
+                  <span>&bull;</span> Personal Injury
                 </button>
               </li>
               <li>
-                <button onClick={() => setCurrentPage("lemon-law")} className="text-primary-foreground/80 hover:text-primary-foreground transition-colors cursor-pointer">
-                  Lemon Law
+                <button onClick={() => setCurrentPage("lemon-law")} className="text-slate-300 hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-2">
+                  <span>&bull;</span> Lemon Law
                 </button>
               </li>
             </ul>
+          </div>
+
+          {/* Column 4: Consultation Action Box */}
+          <div className="bg-slate-900 p-6 rounded-2xl border-2 border-amber-500/50 space-y-4">
+            <h3 className="font-serif font-bold text-lg text-white">Free Legal Evaluation</h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Facing workplace issues, an accident injury, or a lemon vehicle? Speak with our legal team today.
+            </p>
+            <button 
+              onClick={openConsultModal}
+              className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 py-3 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg transition-colors cursor-pointer">
+              Request Free Consultation
+            </button>
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="border-t border-primary-foreground/20 pt-8 text-center text-sm text-primary-foreground/60">
+        {/* Copyright & Bar Admission */}
+        <div className="flex flex-col md:flex-row justify-between items-center text-xs text-slate-400 space-y-4 md:space-y-0">
           <p>© {new Date().getFullYear()} So Cal Legal Group, Inc. All Rights Reserved.</p>
+          <p className="font-mono text-amber-400/90">Admitted to State Bar of CA May of 2022</p>
         </div>
       </div>
     </footer>

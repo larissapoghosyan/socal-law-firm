@@ -3,48 +3,35 @@
 :root {
   --font-size: 16px;
   
-  /* Premium Law Firm Color Palette - Golden Theme */
+  /* Regal Law Firm Color Palette - High Contrast Black & Gold Theme */
   --background: #ffffff;
-  --foreground: #2d1e11; /* Deep chocolate brown for high contrast */
-  --card: #faf7f2; /* Warm bright beige */
-  --card-foreground: #2d1e11;
+  --foreground: #0b0f19; /* Rich obsidian black for authoritative contrast */
+  --card: #ffffff; /* Solid white card background */
+  --card-foreground: #0b0f19;
   --popover: #ffffff;
-  --popover-foreground: #2d1e11;
-  --primary: #AF886A; /* Golden color as requested */
-  --primary-foreground: #ffffff; /* White text on golden background */
-  --secondary: #f5eedf; /* Light golden beige */
-  --secondary-foreground: #2d1e11;
-  --muted: #eaddca;
-  --muted-foreground: #5a4b3d;
-  --accent: #AF886A; /* Golden accent */
+  --popover-foreground: #0b0f19;
+  --primary: #0b0f19; /* Deep Regal Obsidian Black */
+  --primary-foreground: #ffffff; /* Crisp white text */
+  --secondary: #f8fafc; /* Crisp light slate */
+  --secondary-foreground: #0b0f19;
+  --muted: #f1f5f9;
+  --muted-foreground: #475569;
+  --accent: #b8860b; /* Regal Gold accent */
   --accent-foreground: #ffffff;
   --destructive: #991b1b;
   --destructive-foreground: #ffffff;
-  --border: rgba(175, 136, 106, 0.4); /* Golden tinted border */
+  --border: #cbd5e1; /* Clear, defined borders */
   --input: transparent;
   --input-background: #ffffff;
-  --switch-background: #AF886A;
+  --switch-background: #0b0f19;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #AF886A; /* Golden ring */
-  --chart-1: #AF886A;
-  --chart-2: #2d1e11;
-  --chart-3: #f5eedf;
-  --chart-4: #eaddca;
-  --chart-5: #8c7244;
+  --ring: #b8860b;
   --radius: 0.375rem;
-  --sidebar: #faf7f2;
-  --sidebar-foreground: #2d1e11;
-  --sidebar-primary: #AF886A;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f5eedf;
-  --sidebar-accent-foreground: #2d1e11;
-  --sidebar-border: rgba(175, 136, 106, 0.4);
-  --sidebar-ring: #AF886A;
   
-  /* Typography - Serif headers, Sans-serif body */
-  --font-serif: 'Nanum Myeongjo', serif;
-  --font-sans: 'Nanum Myeongjo', serif;
+  /* Regal Typography */
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .dark {
