@@ -4,15 +4,15 @@
   --font-size: 16px;
   
   /* 60-30-10 UI Color Palette */
-  --background: #ffffff; /* 60% Dominant: Crisp White / Off-White */
-  --foreground: #11141a; /* 30% Secondary: Deep Charcoal */
+  --background: #ffffff; /* Pure Crisp White */
+  --foreground: #11141a; /* Deep Charcoal */
   --card: #ffffff;
   --card-foreground: #11141a;
   --popover: #ffffff;
   --popover-foreground: #11141a;
   --primary: #11141a; /* Deep Charcoal */
   --primary-foreground: #ffffff;
-  --secondary: #fafafa;
+  --secondary: #ffffff;
   --secondary-foreground: #11141a;
   --muted: #f4f4f5;
   --muted-foreground: #52525b;
@@ -36,15 +36,15 @@
 
 .dark {
   --background: #11141a;
-  --foreground: #fafafa;
+  --foreground: #ffffff;
   --card: #11141a;
-  --card-foreground: #fafafa;
+  --card-foreground: #ffffff;
   --popover: #11141a;
-  --popover-foreground: #fafafa;
-  --primary: #fafafa;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
   --primary-foreground: #11141a;
   --secondary: #18181b;
-  --secondary-foreground: #fafafa;
+  --secondary-foreground: #ffffff;
   --muted: #27272a;
   --muted-foreground: #a1a1aa;
   --accent: #c5a880;
