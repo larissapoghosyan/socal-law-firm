@@ -974,9 +974,9 @@ function LemonLawPage({ openConsultModal }: any) {
   );
 }
 
-// Testimonials Page
+// Testimonials Page with Serverless Review Submission Form
 function TestimonialsPage({ openConsultModal }: any) {
-  const testimonials = [
+  const initialTestimonials = [
     {
       quote: "So Cal Legal Group handled my wrongful termination case with absolute professionalism. Ms. Sislyan fought for me every step of the way when my former employer tried to ignore my rights. I felt supported and received the compensation I deserved.",
       client: "M. R.",
@@ -1009,6 +1009,75 @@ function TestimonialsPage({ openConsultModal }: any) {
     }
   ];
 
+  const [testimonialsList, setTestimonialsList] = useState(() => {
+    const saved = localStorage.getItem("socal_user_reviews");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return [...initialTestimonials, ...parsed];
+      } catch (e) {
+        return initialTestimonials;
+      }
+    }
+    return initialTestimonials;
+  });
+
+  const [reviewRating, setReviewRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewSuccessMsg, setReviewSuccessMsg] = useState("");
+
+  const handleReviewSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmittingReview(true);
+    setReviewSuccessMsg("");
+
+    const formData = new FormData(e.currentTarget);
+    const clientName = (formData.get("clientName") as string) || "Anonymous Client";
+    const matter = (formData.get("matter") as string) || "Legal Representation";
+    const quote = (formData.get("quote") as string) || "";
+
+    const newReview = {
+      client: clientName,
+      matter: matter,
+      quote: quote,
+      rating: reviewRating
+    };
+
+    // Save locally for instant preview
+    const savedLocal = JSON.parse(localStorage.getItem("socal_user_reviews") || "[]");
+    const updatedLocal = [newReview, ...savedLocal];
+    localStorage.setItem("socal_user_reviews", JSON.stringify(updatedLocal));
+    setTestimonialsList([newReview, ...testimonialsList]);
+
+    // Send to Google Sheets (Serverless Static Backend Solution)
+    const googleSheetsUrl = import.meta.env.VITE_GOOGLE_SHEETS_URL || "";
+    try {
+      if (googleSheetsUrl) {
+        await fetch(googleSheetsUrl, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            type: "CLIENT_REVIEW",
+            clientName,
+            matter,
+            quote,
+            rating: reviewRating,
+            date: new Date().toLocaleDateString()
+          })
+        });
+      }
+    } catch (err) {
+      console.log("Local review logged:", newReview);
+    } finally {
+      setIsSubmittingReview(false);
+      setReviewSuccessMsg("Thank you! Your review has been submitted and added to our client feedback.");
+      (e.target as HTMLFormElement).reset();
+      setReviewRating(5);
+    }
+  };
+
   return (
     <main className="pt-36 sm:pt-44 pb-20 lg:pb-0">
       <section className="py-16 bg-slate-100 text-[#11141A] text-center border-b border-slate-200">
@@ -1017,14 +1086,18 @@ function TestimonialsPage({ openConsultModal }: any) {
           <h1 className="text-4xl lg:text-5xl font-serif font-bold mt-2">
             Client Testimonials
           </h1>
+          <p className="text-slate-600 text-sm mt-2 max-w-lg mx-auto">
+            Read what our clients say about working with So Cal Legal Group, Inc., or leave your own review below.
+          </p>
         </div>
       </section>
 
       <section className="py-20 bg-[#FFFFFF]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
           
+          {/* Testimonial Cards */}
           <div className="grid md:grid-cols-2 gap-8">
-            {testimonials.map((t, idx) => (
+            {testimonialsList.map((t, idx) => (
               <div key={idx} className="bg-[#FFFFFF] border-2 border-[#C5A880]/40 p-8 rounded-3xl shadow-md flex flex-col justify-between space-y-6">
                 <div>
                   <div className="flex items-center gap-1 text-[#B89758] mb-4">
@@ -1047,10 +1120,99 @@ function TestimonialsPage({ openConsultModal }: any) {
             ))}
           </div>
 
-          <div className="pt-8 text-center">
+          {/* Client Review Submission Box (Serverless Solution) */}
+          <div className="bg-[#FFFFFF] border-2 border-[#C5A880] rounded-3xl p-8 sm:p-12 shadow-xl max-w-3xl mx-auto">
+            <div className="text-center mb-8">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#11141A] bg-[#C5A880]/15 px-4 py-1.5 rounded-full border border-[#C5A880]/40">
+                Client Review Submission
+              </span>
+              <h2 className="text-3xl font-serif font-bold text-[#11141A] mt-3">
+                Were You A Client? Submit Your Review
+              </h2>
+              <p className="text-slate-600 text-sm mt-1">
+                Your feedback helps us continuously deliver high-quality, compassionate legal representation.
+              </p>
+            </div>
+
+            <form onSubmit={handleReviewSubmit} className="space-y-6">
+              {/* Star Rating Picker */}
+              <div className="text-center">
+                <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-[#11141A]">Select Your Rating *</label>
+                <div className="flex justify-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setReviewRating(star)}
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      className="p-1 focus:outline-none transition-transform hover:scale-110 cursor-pointer"
+                    >
+                      <Star 
+                        className={`w-8 h-8 ${star <= (hoverRating || reviewRating) ? 'text-[#B89758] fill-[#B89758]' : 'text-slate-300'}`} 
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-[#11141A]">Your Name or Initials *</label>
+                  <input 
+                    type="text" 
+                    name="clientName"
+                    required
+                    placeholder="e.g. Arpi S. or Anonymous"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#C5A880]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-[#11141A]">Legal Practice Area *</label>
+                  <select 
+                    name="matter"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#C5A880]"
+                  >
+                    <option>Employment Law Claim</option>
+                    <option>Personal Injury Case</option>
+                    <option>Lemon Law Vehicle Buyback</option>
+                    <option>General Legal Service</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-[#11141A]">Your Review & Experience *</label>
+                <textarea 
+                  rows={4}
+                  name="quote"
+                  required
+                  placeholder="Share your experience working with Arpi Sislyan and So Cal Legal Group..."
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#C5A880] resize-none"
+                ></textarea>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={isSubmittingReview}
+                className="w-full bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] py-4 rounded-xl text-base font-bold uppercase tracking-wider border border-[#B89758] shadow-lg transition-all cursor-pointer disabled:opacity-70"
+              >
+                {isSubmittingReview ? "Submitting Review..." : "Submit Client Review"}
+              </button>
+
+              {reviewSuccessMsg && (
+                <div className="p-4 rounded-xl text-center font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                  {reviewSuccessMsg}
+                </div>
+              )}
+            </form>
+          </div>
+
+          <div className="pt-4 text-center">
             <button 
               onClick={openConsultModal}
-              className="bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] px-10 py-4 rounded-xl text-lg font-bold shadow-xl uppercase tracking-wider border border-[#B89758] cursor-pointer"
+              className="bg-[#11141A] hover:bg-[#1C2029] text-white px-10 py-4 rounded-xl text-lg font-bold shadow-xl uppercase tracking-wider border border-slate-700 cursor-pointer"
             >
               Schedule Your Free Consultation
             </button>
