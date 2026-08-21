@@ -1093,6 +1093,9 @@ function TestimonialsPage({ openConsultModal }: any) {
 
   const [reviewRating, setReviewRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
+  const [reviewClientName, setReviewClientName] = useState("");
+  const [reviewMatter, setReviewMatter] = useState("");
+  const [reviewQuote, setReviewQuote] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewSuccessMsg, setReviewSuccessMsg] = useState("");
   const [reviewErrorMsg, setReviewErrorMsg] = useState("");
@@ -1102,12 +1105,9 @@ function TestimonialsPage({ openConsultModal }: any) {
     setReviewSuccessMsg("");
     setReviewErrorMsg("");
 
-    const formData = new FormData(e.currentTarget);
-    const clientName = (formData.get("clientName") as string || "").trim();
-    const matter = (formData.get("matter") as string || "").trim();
-    const quote = (formData.get("quote") as string || "").trim();
-
-    // Use selected rating or default to 5 stars
+    const clientName = reviewClientName.trim();
+    const matter = reviewMatter.trim();
+    const quote = reviewQuote.trim();
     const effectiveRating = reviewRating || 5;
 
     // Validation checks
@@ -1143,7 +1143,7 @@ function TestimonialsPage({ openConsultModal }: any) {
         await fetch(googleSheetsUrl, {
           method: "POST",
           mode: "no-cors",
-          headers: { "Content-Type": "text/plain" },
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(reviewPayload)
         });
       }
@@ -1152,7 +1152,9 @@ function TestimonialsPage({ openConsultModal }: any) {
     } finally {
       setIsSubmittingReview(false);
       setReviewSuccessMsg("Thank you! Your review has been submitted to So Cal Legal Group.");
-      (e.target as HTMLFormElement).reset();
+      setReviewClientName("");
+      setReviewMatter("");
+      setReviewQuote("");
       setReviewRating(0);
     }
   };
@@ -1247,6 +1249,8 @@ function TestimonialsPage({ openConsultModal }: any) {
                   <input 
                     type="text" 
                     name="clientName"
+                    value={reviewClientName}
+                    onChange={(e) => setReviewClientName(e.target.value)}
                     required
                     placeholder="Enter your name or initials"
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#C5A880]"
@@ -1257,8 +1261,9 @@ function TestimonialsPage({ openConsultModal }: any) {
                   <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-[#11141A]">Legal Practice Area *</label>
                   <select 
                     name="matter"
+                    value={reviewMatter}
+                    onChange={(e) => setReviewMatter(e.target.value)}
                     required
-                    defaultValue=""
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#C5A880]"
                   >
                     <option value="" disabled>Select Practice Area</option>
@@ -1275,6 +1280,8 @@ function TestimonialsPage({ openConsultModal }: any) {
                 <textarea 
                   rows={4}
                   name="quote"
+                  value={reviewQuote}
+                  onChange={(e) => setReviewQuote(e.target.value)}
                   required
                   placeholder="Share your working experience with So Cal Legal Group"
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#C5A880] resize-none"
