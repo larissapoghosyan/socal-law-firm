@@ -8,6 +8,8 @@ import injuryImg from "@/imports/injury.png";
 import lemonImg from "@/imports/lemon.png";
 
 // Form Validation Helpers (Strict US Phone & Email format verification)
+const GOOGLE_SHEETS_URL = import.meta.env.VITE_GOOGLE_SHEETS_URL || "";
+
 const isValidEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email.trim());
@@ -1074,7 +1076,7 @@ function TestimonialsPage({ openConsultModal }: any) {
   const [testimonialsList, setTestimonialsList] = useState<any[]>([]);
 
   useEffect(() => {
-    const googleSheetsUrl = import.meta.env.VITE_GOOGLE_SHEETS_URL || "";
+    const googleSheetsUrl = GOOGLE_SHEETS_URL;
     if (!googleSheetsUrl) return;
 
     fetch(googleSheetsUrl)
@@ -1136,7 +1138,7 @@ function TestimonialsPage({ openConsultModal }: any) {
     };
 
     // Send to Google Sheets (Attorney Moderation Queue)
-    const googleSheetsUrl = import.meta.env.VITE_GOOGLE_SHEETS_URL || "";
+    const googleSheetsUrl = GOOGLE_SHEETS_URL;
     try {
       if (googleSheetsUrl) {
         await fetch(googleSheetsUrl, {
@@ -1379,7 +1381,7 @@ function ContactPage() {
       message
     };
 
-    const googleSheetsUrl = import.meta.env.VITE_GOOGLE_SHEETS_URL || "";
+    const googleSheetsUrl = GOOGLE_SHEETS_URL;
 
     try {
       if (googleSheetsUrl) {
@@ -1609,7 +1611,7 @@ function ConsultationModal({ closeModal }: { closeModal: () => void }) {
       message
     };
 
-    const googleSheetsUrl = import.meta.env.VITE_GOOGLE_SHEETS_URL || "";
+    const googleSheetsUrl = GOOGLE_SHEETS_URL;
 
     try {
       if (googleSheetsUrl) {
