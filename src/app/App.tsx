@@ -1174,7 +1174,7 @@ function TestimonialsPage({ openConsultModal }: any) {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
           
           {/* Testimonial Cards */}
-          {testimonialsList.length > 0 ? (
+          {testimonialsList.length > 0 && (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
               {testimonialsList.map((t, idx) => (
                 <div key={idx} className="bg-[#FFFFFF] border-2 border-[#C5A880]/40 p-8 rounded-3xl shadow-md flex flex-col justify-between space-y-6">
@@ -1197,14 +1197,6 @@ function TestimonialsPage({ openConsultModal }: any) {
                   </div>
                 </div>
               ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 mb-12 bg-slate-50 border-2 border-dashed border-[#C5A880]/50 rounded-3xl max-w-2xl mx-auto p-8 shadow-sm">
-              <Shield className="w-10 h-10 text-[#B89758] mx-auto mb-3" />
-              <h3 className="font-serif font-bold text-xl text-[#11141A]">Attorney Verified Client Reviews</h3>
-              <p className="text-slate-600 text-sm mt-2 leading-relaxed">
-                All client reviews are submitted directly by verified clients and published upon attorney approval. Have you worked with So Cal Legal Group? Submit your review below!
-              </p>
             </div>
           )}
 
