@@ -1810,10 +1810,9 @@ function Footer({ setCurrentPage, openConsultModal }: any) {
           </div>
         </div>
 
-        {/* Copyright & Bar Admission */}
-        <div className="flex flex-col md:flex-row justify-between items-center text-xs text-slate-400 space-y-4 md:space-y-0">
+        {/* Copyright */}
+        <div className="text-center text-xs text-slate-400">
           <p>© {new Date().getFullYear()} So Cal Legal Group, Inc. All Rights Reserved.</p>
-          <p className="font-mono text-[#C5A880]">Admitted to State Bar of CA May of 2022</p>
         </div>
       </div>
     </footer>
