@@ -1143,7 +1143,7 @@ function TestimonialsPage({ openConsultModal }: any) {
         await fetch(googleSheetsUrl, {
           method: "POST",
           mode: "no-cors",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          headers: { "Content-Type": "text/plain" },
           body: JSON.stringify(reviewPayload)
         });
       }
