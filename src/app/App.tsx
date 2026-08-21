@@ -1107,11 +1107,10 @@ function TestimonialsPage({ openConsultModal }: any) {
     const matter = (formData.get("matter") as string || "").trim();
     const quote = (formData.get("quote") as string || "").trim();
 
+    // Use selected rating or default to 5 stars
+    const effectiveRating = reviewRating || 5;
+
     // Validation checks
-    if (reviewRating === 0) {
-      setReviewErrorMsg("Please select a star rating (1 to 5 stars) for your review.");
-      return;
-    }
     if (!clientName || clientName.length < 2) {
       setReviewErrorMsg("Please enter your name or initials (minimum 2 characters).");
       return;
@@ -1132,7 +1131,7 @@ function TestimonialsPage({ openConsultModal }: any) {
       clientName,
       matter,
       quote,
-      rating: reviewRating,
+      rating: effectiveRating,
       status: "Pending Approval",
       date: new Date().toLocaleDateString()
     };

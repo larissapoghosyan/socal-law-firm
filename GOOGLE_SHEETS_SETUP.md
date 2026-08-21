@@ -26,24 +26,52 @@ This website is fully static and hosted on GitHub Pages. Contact form submission
 function doPost(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var data = JSON.parse(e.postData.contents);
+    if (!ss) {
+      return ContentService.createTextOutput(
+        JSON.stringify({ status: "error", message: "No active spreadsheet found" })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var rawData = (e && e.postData && e.postData.contents) ? e.postData.contents : null;
+    var data = rawData ? JSON.parse(rawData) : (e ? e.parameter : {});
     var timestamp = new Date();
 
-    if (data.type === "CLIENT_REVIEW") {
+    // Check if review or lead
+    var isReview = (data.type === "CLIENT_REVIEW" || data.quote || data.clientName);
+
+    if (isReview) {
       var sheet = ss.getSheetByName("Testimonials");
+      if (!sheet) {
+        var sheets = ss.getSheets();
+        for (var s = 0; s < sheets.length; s++) {
+          if (sheets[s].getName().trim().toLowerCase().includes("testimonial")) {
+            sheet = sheets[s];
+            break;
+          }
+        }
+      }
       if (!sheet) sheet = ss.insertSheet("Testimonials");
 
       sheet.appendRow([
         timestamp,
-        data.clientName || "Anonymous Client",
-        data.matter || "General Legal Service",
+        data.clientName || data.client || "Anonymous Client",
+        data.matter || data.practiceArea || "General Legal Service",
         data.rating || 5,
-        data.quote || "",
+        data.quote || data.message || "",
         "Pending Approval", // Column F (Status)
         false               // Column G (Approve Checkbox)
       ]);
     } else {
       var sheet = ss.getSheetByName("Leads");
+      if (!sheet) {
+        var sheets = ss.getSheets();
+        for (var s = 0; s < sheets.length; s++) {
+          if (sheets[s].getName().trim().toLowerCase().includes("lead")) {
+            sheet = sheets[s];
+            break;
+          }
+        }
+      }
       if (!sheet) sheet = ss.insertSheet("Leads");
 
       sheet.appendRow([
@@ -68,32 +96,75 @@ function doPost(e) {
   }
 }
 
-// 2. Returns ONLY Approved Reviews to the Website
+// 2. Returns ONLY Approved Reviews to the Website (Header-Smart Scanner)
 function doGet(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName("Testimonials");
+    if (!ss) {
+      return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Find sheet matching Testimonials (case-insensitive & trimmed)
+    var sheets = ss.getSheets();
+    var sheet = null;
+    for (var s = 0; s < sheets.length; s++) {
+      var name = sheets[s].getName().trim().toLowerCase();
+      if (name === "testimonials" || name === "testimonial" || name.includes("testimonial")) {
+        sheet = sheets[s];
+        break;
+      }
+    }
+    
     if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify([]))
-        .setMimeType(ContentService.MimeType.JSON);
+      return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
     }
 
     var rows = sheet.getDataRange().getValues();
+    if (rows.length <= 1) {
+      return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Dynamic Column Index Finder from Row 1 Header
+    var header = rows[0].map(function(h) { return String(h).trim().toLowerCase(); });
+    var colClient = header.findIndex(function(h) { return h.includes("client") || h.includes("name"); });
+    var colMatter = header.findIndex(function(h) { return h.includes("matter") || h.includes("practice") || h.includes("area"); });
+    var colRating = header.findIndex(function(h) { return h.includes("rating") || h.includes("star"); });
+    var colQuote  = header.findIndex(function(h) { return h.includes("review") || h.includes("quote") || h.includes("text"); });
+    var colStatus = header.findIndex(function(h) { return h.includes("status"); });
+    var colApprove = header.findIndex(function(h) { return h.includes("approve") || h.includes("publish"); });
+
+    // Fallbacks if header labels vary
+    if (colClient === -1) colClient = 1;
+    if (colMatter === -1) colMatter = 2;
+    if (colRating === -1) colRating = 3;
+    if (colQuote === -1) colQuote = 4;
+    if (colStatus === -1) colStatus = 5;
+    if (colApprove === -1) colApprove = 6;
+
     var approvedReviews = [];
 
-    // Loop through rows (skip header row 1)
     for (var i = 1; i < rows.length; i++) {
-      var status = rows[i][5];     // Column F (Status)
-      var isApproved = rows[i][6]; // Column G (Approve Checkbox)
+      var row = rows[i];
+      var statusVal = String(row[colStatus] || "").trim().toLowerCase();
+      var approveVal = row[colApprove];
 
-      // Publish ONLY if Approved is checked (TRUE) or status is "Approved"
-      if (isApproved === true || isApproved === "TRUE" || status === "Approved") {
-        approvedReviews.push({
-          client: rows[i][1],
-          matter: rows[i][2],
-          rating: Number(rows[i][3]) || 5,
-          quote: rows[i][4]
-        });
+      var isApproved = (approveVal === true || String(approveVal).trim().toUpperCase() === "TRUE" || statusVal === "approved");
+
+      if (isApproved) {
+        var clientVal = String(row[colClient] || "Verified Client").trim();
+        var matterVal = String(row[colMatter] || "Legal Services").trim();
+        var ratingVal = Number(row[colRating]) || 5;
+        var quoteVal  = String(row[colQuote] || "").trim();
+
+        if (quoteVal.length > 0) {
+          approvedReviews.push({
+            client: clientVal,
+            clientName: clientVal,
+            matter: matterVal,
+            rating: ratingVal,
+            quote: quoteVal
+          });
+        }
       }
     }
 
