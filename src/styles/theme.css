@@ -87,6 +87,16 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    width: 100%;
+    max-width: 100%;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    padding: 0;
   }
 
   body {
@@ -94,11 +104,12 @@
     font-family: var(--font-sans);
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-serif);
+  img {
+    max-width: 100%;
+    height: auto;
   }
 
-  html {
-    font-size: var(--font-size);
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
   }
 }

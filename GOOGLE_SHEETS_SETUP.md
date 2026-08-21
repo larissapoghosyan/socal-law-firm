@@ -22,27 +22,85 @@ This website is fully static and hosted on GitHub Pages. Contact form submission
 2. Replace all existing code in the editor with the following:
 
 ```javascript
+// 1. Handles Incoming Submissions (Leads & Testimonials)
 function doPost(e) {
   try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
     var data = JSON.parse(e.postData.contents);
-    
-    sheet.appendRow([
-      new Date(),
-      data.firstName || '',
-      data.lastName || '',
-      data.phone || '',
-      data.email || '',
-      data.practiceArea || '',
-      data.message || ''
-    ]);
-    
-    return ContentService
-      .createTextOutput(JSON.stringify({ "result": "success" }))
+    var timestamp = new Date();
+
+    if (data.type === "CLIENT_REVIEW") {
+      var sheet = ss.getSheetByName("Testimonials");
+      if (!sheet) sheet = ss.insertSheet("Testimonials");
+
+      sheet.appendRow([
+        timestamp,
+        data.clientName || "Anonymous Client",
+        data.matter || "General Legal Service",
+        data.rating || 5,
+        data.quote || "",
+        "Pending Approval", // Column F (Status)
+        false               // Column G (Approve Checkbox)
+      ]);
+    } else {
+      var sheet = ss.getSheetByName("Leads");
+      if (!sheet) sheet = ss.insertSheet("Leads");
+
+      sheet.appendRow([
+        timestamp,
+        data.firstName || "",
+        data.lastName || "",
+        data.phone || "",
+        data.email || "",
+        data.practiceArea || "",
+        data.message || ""
+      ]);
+    }
+
+    return ContentService.createTextOutput(
+      JSON.stringify({ status: "success" })
+    ).setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ status: "error", message: err.toString() })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// 2. Returns ONLY Approved Reviews to the Website
+function doGet(e) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName("Testimonials");
+    if (!sheet) {
+      return ContentService.createTextOutput(JSON.stringify([]))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var rows = sheet.getDataRange().getValues();
+    var approvedReviews = [];
+
+    // Loop through rows (skip header row 1)
+    for (var i = 1; i < rows.length; i++) {
+      var status = rows[i][5];     // Column F (Status)
+      var isApproved = rows[i][6]; // Column G (Approve Checkbox)
+
+      // Publish ONLY if Approved is checked (TRUE) or status is "Approved"
+      if (isApproved === true || isApproved === "TRUE" || status === "Approved") {
+        approvedReviews.push({
+          client: rows[i][1],
+          matter: rows[i][2],
+          rating: Number(rows[i][3]) || 5,
+          quote: rows[i][4]
+        });
+      }
+    }
+
+    return ContentService.createTextOutput(JSON.stringify(approvedReviews))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ "result": "error", "error": err.message }))
+    return ContentService.createTextOutput(JSON.stringify([]))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }

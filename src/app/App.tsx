@@ -3,6 +3,22 @@ import { Menu, X, Phone, Calendar, ChevronDown, MapPin, Mail, Star, Shield, User
 import logoImg from "@/imports/Main_logo_socal.png";
 import headshot1 from "@/imports/headshot_1.jpeg";
 import headshot2 from "@/imports/headshot_2.jpeg";
+import employmentImg from "@/imports/employment.png";
+import injuryImg from "@/imports/injury.png";
+import lemonImg from "@/imports/lemon.png";
+
+// Form Validation Helpers (Strict US Phone & Email format verification)
+const isValidEmail = (email: string): boolean => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email.trim());
+};
+
+const isValidUSPhone = (phone: string): boolean => {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 10) return true;
+  if (digits.length === 11 && digits.startsWith("1")) return true;
+  return false;
+};
 
 // Helper to determine route from pathname or hash for static hosting
 const getInitialRoute = () => {
@@ -33,16 +49,31 @@ export default function App() {
   // Wrapper function to ensure scrolling to top on every navigation click
   const setCurrentPage = (page: string) => {
     setCurrentPageState(page);
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }, 20);
   };
 
   const openConsultModal = () => setIsConsultModalOpen(true);
   const closeConsultModal = () => setIsConsultModalOpen(false);
 
+  // Guarantee scroll to top whenever page state changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [currentPageState]);
+
   // Handle browser back/forward buttons and hash navigation
   useEffect(() => {
     const handleLocationChange = () => {
       setCurrentPageState(getInitialRoute());
+      window.scrollTo(0, 0);
     };
     
     window.addEventListener("popstate", handleLocationChange);
@@ -186,16 +217,44 @@ export default function App() {
   );
 }
 
-// Header Component (Light Slate Utility Bar, Crisp White Header)
-function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen, openConsultModal }: any) {
-  const [scrolled, setScrolled] = useState(false);
+// Header Component (Light Slate Utility Bar, Crisp White Header with Gentle Folding Motion)
+function Header({ currentPage, setCurrentPage, openConsultModal }: any) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showHeader, setShowHeader] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
+    let lastY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      const currentY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      const diff = currentY - lastY;
+
+      // Gently fold top bar as soon as user scrolls down past 15px
+      setIsScrolled(currentY > 15);
+
+      // Keep header visible at top of page (first 60px)
+      if (currentY <= 60) {
+        setShowHeader(true);
+      } 
+      // Gently hide header when scrolling down
+      else if (diff > 5) {
+        setShowHeader(false);
+      } 
+      // Gently open header when scrolling up anywhere
+      else if (diff < -5) {
+        setShowHeader(true);
+      }
+
+      lastY = currentY;
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   const navItems = [
@@ -216,46 +275,69 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
 
   return (
     <>
-      {/* Light Slate Utility Top Bar */}
-      <div className="bg-slate-100 text-slate-700 border-b border-slate-200 text-xs py-2.5 px-4 sm:px-8 hidden sm:block z-50 relative font-sans">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-6">
-            <span className="font-bold text-[#11141A] tracking-wider uppercase">So Cal Legal Group, Inc.</span>
-            <span>Mailing Address: 1812 West Burbank Blvd., #36 Burbank CA 91506</span>
-          </div>
-          <div className="flex items-center gap-6 font-medium">
-            <a href="mailto:info@sclglawyers.com" className="hover:text-[#B89758] transition-colors">info@sclglawyers.com</a>
-            <a href="tel:8182322760" className="text-[#11141A] font-bold hover:underline flex items-center gap-1.5">
-              <Phone className="w-3.5 h-3.5 text-[#B89758]" /> (818) 232-2760
-            </a>
+      {/* Smart Gently Folding Header Container */}
+      <header 
+        className={`fixed top-0 left-0 right-0 z-50 w-full bg-[#FFFFFF] border-b border-slate-200 shadow-sm transition-all duration-500 ease-in-out ${
+          showHeader ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
+        }`}
+      >
+        {/* Light Slate Utility Top Bar - Gently Folds Back on Scroll Down */}
+        <div 
+          className="bg-[#F4F6F8] text-[#11141A] border-b border-slate-200/80 text-xs sm:text-sm px-4 sm:px-8 hidden sm:block font-sans overflow-hidden transition-all duration-500 ease-in-out"
+          style={{
+            maxHeight: isScrolled ? "0px" : "44px",
+            opacity: isScrolled ? 0 : 1,
+            paddingTop: isScrolled ? "0px" : "6px",
+            paddingBottom: isScrolled ? "0px" : "6px",
+            borderBottomWidth: isScrolled ? "0px" : "1px"
+          }}
+        >
+          <div className="max-w-7xl mx-auto flex justify-end items-center">
+            <div className="flex items-center gap-8 font-medium">
+              <a href="mailto:info@sclglawyers.com" className="text-[#11141A] font-medium hover:text-[#B89758] transition-colors text-xs sm:text-sm">
+                info@sclglawyers.com
+              </a>
+              <a href="tel:8182322760" className="text-[#11141A] font-bold hover:underline flex items-center gap-2 text-xs sm:text-sm">
+                <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#B89758]" /> (818) 232–2760
+              </a>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Header Container */}
-      <header className={`fixed top-0 sm:top-[37px] left-0 right-0 z-50 transition-all duration-300 bg-[#FFFFFF] border-b border-slate-200 ${scrolled ? 'shadow-md py-2' : 'py-3'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center min-h-[96px] sm:min-h-[108px]">
+        {/* Main Header Navbar - Gently Compacts on Scroll */}
+        <div 
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-500 ease-in-out"
+          style={{
+            paddingTop: isScrolled ? "6px" : "10px",
+            paddingBottom: isScrolled ? "6px" : "10px"
+          }}
+        >
+          <div 
+            className="flex justify-between items-center transition-all duration-500 ease-in-out"
+            style={{
+              minHeight: isScrolled ? "60px" : "76px"
+            }}
+          >
             
             {/* Left Section: Logo + Navigation Links */}
-            <div className="flex items-center gap-8 xl:gap-14">
+            <div className="flex items-center gap-6 lg:gap-8 xl:gap-12">
               <button
                 onClick={() => setCurrentPage("home")}
-                className="flex items-center cursor-pointer py-1 border-r border-slate-200 pr-6 sm:pr-8"
+                className="flex items-center cursor-pointer py-0.5 border-r border-slate-200 pr-4 sm:pr-6 flex-shrink-0"
               >
                 <img
                   src={logoImg}
                   alt="So Cal Legal Group, Inc."
-                  className="h-24 sm:h-28 md:h-32 lg:h-36 xl:h-40 w-auto object-contain transition-all duration-200"
+                  className="h-16 sm:h-20 md:h-24 lg:h-28 xl:h-32 w-auto object-contain transition-all duration-200"
                 />
               </button>
 
               {/* Desktop Navigation Links */}
-              <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+              <nav className="hidden lg:flex items-center gap-4 xl:gap-8">
                 {navItems.map((item) => (
                   item.submenu ? (
-                    <div key={item.id} className="relative group">
-                      <button className="flex items-center space-x-1.5 py-3 text-[#11141A] hover:text-[#B89758] font-semibold transition-colors cursor-pointer text-base uppercase tracking-wider">
+                    <div key={item.id} className="relative group flex-shrink-0">
+                      <button className="inline-flex items-center gap-1.5 py-3 text-[#11141A] hover:text-[#B89758] font-semibold transition-colors cursor-pointer text-xs xl:text-sm uppercase tracking-wider whitespace-nowrap">
                         <span>{item.label}</span>
                         <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180 text-[#B89758]" />
                       </button>
@@ -264,7 +346,7 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
                           <button
                             key={subitem.id}
                             onClick={() => setCurrentPage(subitem.id)}
-                            className="block w-full text-left px-5 py-3 text-sm text-slate-800 hover:bg-slate-100 hover:text-[#B89758] transition-colors cursor-pointer font-medium"
+                            className="block w-full text-left px-5 py-3 text-sm text-slate-800 hover:bg-slate-100 hover:text-[#B89758] transition-colors cursor-pointer font-medium whitespace-nowrap"
                           >
                             {subitem.label}
                           </button>
@@ -275,7 +357,7 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
                     <button
                       key={item.id}
                       onClick={() => setCurrentPage(item.id)}
-                      className={`font-semibold transition-colors cursor-pointer text-base uppercase tracking-wider py-3 border-b-2 ${currentPage === item.id ? 'text-[#11141A] border-[#C5A880]' : 'text-[#11141A] border-transparent hover:text-[#B89758]'}`}
+                      className={`font-semibold transition-colors cursor-pointer text-xs xl:text-sm uppercase tracking-wider py-3 border-b-2 flex-shrink-0 whitespace-nowrap ${currentPage === item.id ? 'text-[#11141A] border-[#C5A880]' : 'text-[#11141A] border-transparent hover:text-[#B89758]'}`}
                     >
                       {item.label}
                     </button>
@@ -285,10 +367,10 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
             </div>
             
             {/* Right Section: Call Button & Golden Beige Consultation CTA */}
-            <div className="hidden lg:flex items-center space-x-4">
+            <div className="hidden lg:flex items-center gap-3 xl:gap-4 flex-shrink-0">
               <a
                 href="tel:8182322760"
-                className="flex items-center gap-2 text-[#11141A] font-bold text-sm bg-slate-100 px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-200 transition-all shadow-sm"
+                className="hidden xl:inline-flex items-center gap-2 text-[#11141A] font-bold text-xs xl:text-sm bg-slate-100 px-3.5 xl:px-4 py-2.5 xl:py-3 rounded-xl border border-slate-200 hover:bg-slate-200 transition-all shadow-sm whitespace-nowrap flex-shrink-0"
               >
                 <Phone className="w-4 h-4 text-[#B89758]" />
                 (818) 232-2760
@@ -296,7 +378,7 @@ function Header({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
 
               <button 
                 onClick={openConsultModal}
-                className="bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] px-6 py-3 rounded-xl font-bold transition-all shadow-sm hover:shadow-md cursor-pointer uppercase text-xs tracking-wider border border-[#B89758]">
+                className="inline-flex items-center justify-center bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] px-4 xl:px-6 py-2.5 xl:py-3 rounded-xl font-bold transition-all shadow-sm hover:shadow-md cursor-pointer uppercase text-xs tracking-wider border border-[#B89758] whitespace-nowrap flex-shrink-0">
                 Free Consultation
               </button>
             </div>
@@ -410,36 +492,32 @@ function MobileBottomBar({ openConsultModal }: any) {
 // Home Page - Light & Spacious Hero Section (Cut down the heavy black!)
 function HomePage({ setCurrentPage, openConsultModal }: any) {
   return (
-    <main className="pt-36 sm:pt-44 pb-20 lg:pb-0">
+    <main className="pt-28 sm:pt-36 pb-20 lg:pb-0">
       {/* Hero Section - Crisp Bright Background with Dark Charcoal Serif Typography & Golden Beige Accents */}
-      <section className="relative bg-[#FFFFFF] text-[#11141A] py-20 lg:py-28 overflow-hidden border-b border-slate-200">
+      <section className="relative bg-[#FFFFFF] text-[#11141A] py-16 lg:py-24 overflow-hidden border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-7 space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#C5A880]/15 border border-[#C5A880]/40 rounded-full text-xs font-bold uppercase tracking-widest text-[#11141A]">
-                <Shield className="w-4 h-4 text-[#B89758]" />
-                <span>Southern California Legal Advocacy</span>
-              </div>
-
-              {/* Dark Charcoal Serif Heading with Golden Beige Subtext Accent Line */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#11141A] leading-tight tracking-tight">
-                Representation Built on <br />
-                <span className="text-[#B89758] italic">Trust, Integrity & Results</span>
+              
+              {/* Dark Charcoal Serif Heading - Bold & High Contrast Pop */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-black text-[#11141A] leading-tight tracking-tight">
+                Representation Built on{" "}
+                <span className="text-[#B89758] italic block sm:inline-block font-extrabold mt-1">Trust, Integrity & Results</span>
               </h1>
               
-              <p className="text-lg lg:text-xl text-slate-700 leading-relaxed font-sans border-l-4 border-[#C5A880] pl-6">
+              <p className="text-base sm:text-lg lg:text-xl text-slate-800 leading-relaxed font-sans border-l-4 border-[#C5A880] pl-6 font-medium">
                 At So Cal Legal Group, we believe every client deserves honesty, respect, and unwavering advocacy. We built our firm on integrity, trust, and a commitment to standing up for individuals when they need it most. Whether you are facing workplace injustice, recovering from a serious injury, or dealing with a defective vehicle, our mission is simple: protect your rights, guide you through the legal process, and fight relentlessly for the outcome you deserve. At So Cal Legal Group, we take pride in providing personalized representation with the dedication, compassion, and results-driven approach every client deserves.
               </p>
               
-              <div className="flex flex-wrap items-center gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
                 <button 
                   onClick={openConsultModal}
-                  className="bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] px-8 py-4 rounded-xl text-base font-bold shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer uppercase tracking-wider border border-[#B89758]">
+                  className="bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] px-7 py-4 rounded-xl text-sm sm:text-base font-bold shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer uppercase tracking-wider border border-[#B89758] whitespace-nowrap flex-shrink-0 text-center">
                   Schedule Free Consultation
                 </button>
                 <a 
                   href="tel:8182322760"
-                  className="bg-slate-100 hover:bg-slate-200 text-[#11141A] border border-slate-300 px-7 py-4 rounded-xl text-base font-bold transition-all flex items-center gap-3">
+                  className="bg-slate-100 hover:bg-slate-200 text-[#11141A] border border-slate-300 px-6 py-4 rounded-xl text-sm sm:text-base font-bold transition-all flex items-center justify-center gap-3 whitespace-nowrap flex-shrink-0">
                   <Phone className="w-5 h-5 text-[#B89758]" />
                   (818) 232-2760
                 </a>
@@ -449,7 +527,7 @@ function HomePage({ setCurrentPage, openConsultModal }: any) {
             {/* Featured Portrait Card */}
             <div className="lg:col-span-5 flex justify-center">
               <div className="relative w-full max-w-md">
-                <div className="relative bg-[#FFFFFF] border-2 border-slate-200 rounded-3xl overflow-hidden shadow-2xl">
+                <div className="relative bg-[#FFFFFF] border-2 border-[#C5A880]/60 rounded-3xl overflow-hidden shadow-2xl">
                   <img 
                     src={headshot2} 
                     alt="Arpi Sislyan, Esq. - Partner"
@@ -457,8 +535,7 @@ function HomePage({ setCurrentPage, openConsultModal }: any) {
                   />
                   <div className="p-6 bg-[#FFFFFF] text-[#11141A] border-t-2 border-[#C5A880]/50">
                     <h3 className="text-2xl font-bold font-serif text-[#11141A]">Arpi Sislyan, Esq.</h3>
-                    <p className="text-[#B89758] text-sm font-semibold tracking-wide uppercase mt-1">Partner &bull; So Cal Legal Group, Inc.</p>
-                    <p className="text-slate-600 text-xs mt-2 font-mono">Admitted to State Bar of CA May of 2022</p>
+                    <p className="text-[#B89758] text-sm font-bold tracking-widest uppercase mt-1">PARTNER</p>
                   </div>
                 </div>
               </div>
@@ -485,6 +562,7 @@ function HomePage({ setCurrentPage, openConsultModal }: any) {
               icon={<Users className="w-10 h-10 text-[#B89758]" />}
               title="Employment Law"
               category="Workplace Rights"
+              imgSrc={employmentImg}
               description="Employees deserve to be treated fairly, lawfully, and with dignity. At So Cal Legal Group, we represent individuals facing wrongful termination, workplace harassment, discrimination, retaliation, wage and hour violations, and other employment disputes. We understand the emotional and financial toll these situations can create, and we are committed to protecting your rights while aggressively pursuing the justice and compensation you deserve."
               onClick={() => setCurrentPage("employment-law")}
             />
@@ -492,6 +570,7 @@ function HomePage({ setCurrentPage, openConsultModal }: any) {
               icon={<Shield className="w-10 h-10 text-[#B89758]" />}
               title="Personal Injury"
               category="Accident & Injury"
+              imgSrc={injuryImg}
               description="A serious injury can disrupt every aspect of your life — physically, emotionally, and financially. Whether you were injured in a motor vehicle accident, slip and fall, or another act of negligence, So Cal Legal Group is prepared to fight for the maximum compensation available for your injuries, lost wages, pain and suffering, and future damages. Our goal is not only to help you recover financially, but to help you move forward with confidence."
               onClick={() => setCurrentPage("personal-injury")}
             />
@@ -499,6 +578,7 @@ function HomePage({ setCurrentPage, openConsultModal }: any) {
               icon={<Scale className="w-10 h-10 text-[#B89758]" />}
               title="Lemon Law"
               category="Consumer Protection"
+              imgSrc={lemonImg}
               description="Purchasing or leasing a defective vehicle can be frustrating, stressful, and costly. California law protects consumers from being stuck with vehicles that repeatedly fail to meet quality and safety standards. At So Cal Legal Group, we help clients hold manufacturers accountable and pursue buybacks, replacements, and financial compensation under California Lemon Law."
               onClick={() => setCurrentPage("lemon-law")}
             />
@@ -577,11 +657,11 @@ function HomePage({ setCurrentPage, openConsultModal }: any) {
                 className="w-full h-full object-cover" 
               />
             </div>
-            <div className="space-y-6">
-              <span className="text-xs font-bold tracking-widest text-[#11141A] uppercase bg-[#C5A880]/15 px-4 py-1.5 rounded-full border border-[#C5A880]/40">
+            <div className="space-y-6 pt-2">
+              <span className="inline-block text-xs font-bold tracking-widest text-[#11141A] uppercase bg-[#C5A880]/15 px-4 py-1.5 rounded-full border border-[#C5A880]/40 mb-3">
                 Founding Partner
               </span>
-              <h2 className="text-4xl lg:text-5xl font-serif font-bold text-[#11141A]">
+              <h2 className="text-4xl lg:text-5xl font-serif font-bold text-[#11141A] mt-4">
                 Meet Arpi Sislyan
               </h2>
               <p className="text-lg text-slate-700 leading-relaxed">
@@ -626,28 +706,28 @@ function HomePage({ setCurrentPage, openConsultModal }: any) {
               If you have been wronged, injured, or taken advantage of, you do not have to face it alone. So Cal Legal Group is ready to protect your rights, guide you through the legal process, and fight for the justice and compensation you deserve. Contact us today to schedule your free consultation.
             </p>
 
-            <div className="flex flex-wrap justify-center gap-4 pt-4">
-              <button 
-                onClick={openConsultModal}
-                className="bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] px-9 py-4 rounded-xl text-base font-bold shadow-xl transition-all transform hover:-translate-y-0.5 cursor-pointer uppercase tracking-wider border border-[#B89758]">
-                Schedule Free Consultation Now
-              </button>
-              <a 
-                href="tel:8182322760" 
-                className="bg-slate-100 hover:bg-slate-200 text-[#11141A] border border-slate-300 px-8 py-4 rounded-xl text-base font-bold flex items-center gap-3 transition-all">
-                <Phone className="w-5 h-5 text-[#B89758]" />
-                Call (818) 232-2760
-              </a>
+              <div className="flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-4 pt-4">
+                <button 
+                  onClick={openConsultModal}
+                  className="bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] px-7 sm:px-9 py-4 rounded-xl text-sm sm:text-base font-bold shadow-xl transition-all transform hover:-translate-y-0.5 cursor-pointer uppercase tracking-wider border border-[#B89758] whitespace-nowrap flex-shrink-0 text-center">
+                  Schedule Free Consultation Now
+                </button>
+                <a 
+                  href="tel:8182322760" 
+                  className="bg-slate-100 hover:bg-slate-200 text-[#11141A] border border-slate-300 px-6 sm:px-8 py-4 rounded-xl text-sm sm:text-base font-bold flex items-center justify-center gap-3 transition-all whitespace-nowrap flex-shrink-0">
+                  <Phone className="w-5 h-5 text-[#B89758]" />
+                  Call (818) 232-2760
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
     </main>
   );
 }
 
 // Practice Area Card Component
-function PracticeAreaCard({ icon, title, category, description, onClick }: any) {
+function PracticeAreaCard({ icon, title, category, description, imgSrc, onClick }: any) {
   return (
     <div 
       onClick={onClick}
@@ -663,13 +743,22 @@ function PracticeAreaCard({ icon, title, category, description, onClick }: any) 
           </span>
         </div>
 
-        {/* Light Practice Area Designated Photo Placeholder Container */}
-        <div className="w-full h-40 bg-slate-50 rounded-2xl border border-slate-200 mb-6 flex flex-col items-center justify-center p-4 text-center group-hover:border-[#C5A880]/50 transition-colors relative overflow-hidden">
-          <Shield className="w-8 h-8 text-[#B89758] mb-2 relative z-10" />
-          <span className="text-xs font-bold text-[#11141A] uppercase tracking-wider relative z-10">
-            [ {title} Photo Slot ]
-          </span>
-          <span className="text-[10px] text-slate-500 relative z-10 mt-1">Designated Photo Area</span>
+        {/* Practice Area Photo Container */}
+        <div className="w-full h-44 bg-slate-100 rounded-2xl border border-slate-200 mb-6 overflow-hidden relative group-hover:border-[#C5A880]/50 transition-colors">
+          {imgSrc ? (
+            <img 
+              src={imgSrc} 
+              alt={title} 
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center">
+              <Shield className="w-8 h-8 text-[#B89758] mb-2 relative z-10" />
+              <span className="text-xs font-bold text-[#11141A] uppercase tracking-wider relative z-10">
+                [ {title} Photo Slot ]
+              </span>
+            </div>
+          )}
         </div>
 
         <h3 className="text-2xl font-serif font-bold mb-4 text-[#11141A] group-hover:text-[#B89758] transition-colors">
@@ -692,7 +781,7 @@ function PracticeAreaCard({ icon, title, category, description, onClick }: any) 
 // Meet Arpi Page (Attorney Profile)
 function AboutPage({ setCurrentPage, openConsultModal }: any) {
   return (
-    <main className="pt-36 sm:pt-44 pb-20 lg:pb-0">
+    <main className="pt-28 sm:pt-36 pb-20 lg:pb-0">
       <section className="py-20 bg-[#FFFFFF] border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-12 gap-12 items-start">
@@ -716,16 +805,14 @@ function AboutPage({ setCurrentPage, openConsultModal }: any) {
                   <div className="flex items-start gap-3">
                     <Users className="w-5 h-5 text-[#B89758] flex-shrink-0 mt-1" />
                     <div>
-                      <span className="text-xs uppercase font-bold tracking-wider text-slate-500 block">Attorney Name</span>
-                      <span className="font-bold text-[#11141A] text-base">Arpi Sislyan, Esq.</span>
-                      <span className="text-[#B89758] text-xs block font-medium">Partner &bull; So Cal Legal Group, Inc.</span>
+                      <span className="font-bold text-[#11141A] text-base block">Arpi Sislyan, Esq.</span>
+                      <span className="text-[#B89758] text-xs block font-bold tracking-wider uppercase">Partner</span>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
                     <Phone className="w-5 h-5 text-[#B89758] flex-shrink-0 mt-1" />
                     <div>
-                      <span className="text-xs uppercase font-bold tracking-wider text-slate-500 block">Telephone</span>
                       <a href="tel:8182322760" className="font-bold text-[#11141A] text-base hover:text-[#B89758] transition-colors">(818) 232-2760</a>
                     </div>
                   </div>
@@ -733,17 +820,17 @@ function AboutPage({ setCurrentPage, openConsultModal }: any) {
                   <div className="flex items-start gap-3">
                     <Mail className="w-5 h-5 text-[#B89758] flex-shrink-0 mt-1" />
                     <div>
-                      <span className="text-xs uppercase font-bold tracking-wider text-slate-500 block">Email Address</span>
                       <a href="mailto:info@sclglawyers.com" className="font-bold text-[#11141A] hover:underline block text-sm">info@sclglawyers.com</a>
-                      <a href="mailto:arpi@sclglawyers.com" className="font-semibold text-slate-600 hover:underline text-xs">arpi@sclglawyers.com</a>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-[#B89758] flex-shrink-0 mt-1" />
+                    <Mail className="w-5 h-5 text-[#B89758] flex-shrink-0 mt-1" />
                     <div>
-                      <span className="text-xs uppercase font-bold tracking-wider text-slate-500 block">Mailing Address</span>
-                      <span className="text-slate-700 text-sm font-medium">1812 West Burbank Blvd., #36 Burbank CA 91506</span>
+                      <span className="text-slate-800 text-sm font-semibold leading-snug block">
+                        1812 West Burbank Blvd., #36<br />
+                        Burbank, CA 91506
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -766,7 +853,7 @@ function AboutPage({ setCurrentPage, openConsultModal }: any) {
                 <h1 className="text-4xl lg:text-5xl font-serif font-bold mt-4 text-[#11141A]">
                   Meet Arpi Sislyan
                 </h1>
-                <p className="text-lg text-[#11141A] font-bold mt-1">Founding Partner &bull; So Cal Legal Group</p>
+                <p className="text-lg text-[#B89758] font-bold tracking-wider uppercase mt-2">Founding Partner</p>
               </div>
 
               <div className="space-y-6 text-lg text-slate-800 leading-relaxed font-sans">
@@ -797,18 +884,19 @@ function AboutPage({ setCurrentPage, openConsultModal }: any) {
                   Education & Bar Admissions
                 </h3>
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div className="bg-[#FFFFFF] p-6 rounded-2xl border-2 border-slate-200 shadow-md">
+                  <div className="bg-[#FFFFFF] p-6 rounded-2xl border-2 border-[#C5A880]/60 shadow-md">
                     <Award className="w-8 h-8 text-[#B89758] mb-3" />
                     <h4 className="font-serif font-bold text-[#11141A] text-lg mb-1">University of West Los Angeles</h4>
                     <p className="text-sm font-bold text-[#11141A] mb-2">Juris Doctor (J.D.)</p>
                     <p className="text-xs text-slate-700 leading-relaxed">Received the prestigious Witkin Award in Business Associations for academic excellence.</p>
                   </div>
 
-                  <div className="bg-[#FFFFFF] text-[#11141A] p-6 rounded-2xl border-2 border-[#C5A880] shadow-md">
+                  <div className="bg-[#FFFFFF] text-[#11141A] p-6 rounded-2xl border-2 border-[#C5A880]/80 shadow-md">
                     <Shield className="w-8 h-8 text-[#B89758] mb-3" />
                     <h4 className="font-serif font-bold text-[#11141A] text-lg mb-1">Bar Admission & Certification</h4>
-                    <p className="text-sm font-bold text-[#11141A] mt-2">
-                      Admitted to State Bar of CA May of 2022
+                    <p className="text-sm font-bold text-[#11141A] mt-2 leading-snug">
+                      Admitted to State Bar of California<br />
+                      May of 2022
                     </p>
                   </div>
                 </div>
@@ -823,45 +911,47 @@ function AboutPage({ setCurrentPage, openConsultModal }: any) {
 
 // Employment Law Page
 function EmploymentLawPage({ openConsultModal }: any) {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
+
   return (
-    <main className="pt-36 sm:pt-44 pb-20 lg:pb-0">
-      <section className="py-16 bg-slate-100 text-[#11141A] border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="text-xs font-bold text-[#B89758] uppercase tracking-widest">Practice Area Overview</span>
-          <h1 className="text-4xl lg:text-5xl font-serif font-bold mt-2">
+    <main className="pt-24 sm:pt-28 pb-20 lg:pb-0">
+      {/* Title & Photo Centered Header Banner */}
+      <section className="py-8 sm:py-10 bg-slate-100 text-[#11141A] border-b border-slate-200 text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <span className="text-xs font-bold text-[#B89758] uppercase tracking-widest block">Practice Area Overview</span>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-[#11141A]">
             Employment Law
           </h1>
+          {/* Practice Area Photo - Centered, Uncropped with Desk & Scale Visible */}
+          <div className="max-w-lg mx-auto w-full bg-slate-50 rounded-2xl overflow-hidden border-2 border-[#C5A880]/60 shadow-lg mt-4 flex items-center justify-center p-1">
+            <img 
+              src={employmentImg} 
+              alt="Employment Law Advocacy" 
+              className="w-full h-auto max-h-64 sm:max-h-72 object-contain mx-auto" 
+            />
+          </div>
         </div>
       </section>
 
-      <section className="py-20 bg-[#FFFFFF]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          {/* Designated Practice Area Photo Slot */}
-          <div className="w-full h-72 sm:h-96 bg-slate-100 rounded-3xl border-2 border-slate-200 shadow-xl flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
-            <Users className="w-16 h-16 text-[#B89758] mb-4 relative z-10" />
-            <h3 className="text-2xl font-serif font-bold text-[#11141A] relative z-10 mb-2">
-              Employment Law Practice Area Photo
-            </h3>
-            <p className="text-[#B89758] text-sm font-semibold tracking-wider uppercase relative z-10">
-              [ Designated Photo Space Reserved ]
-            </p>
-            <span className="text-xs text-slate-500 relative z-10 mt-2">Photo to be provided for Employment Law page</span>
-          </div>
-
-          <div className="bg-[#FFFFFF] border-2 border-slate-200 p-8 sm:p-12 rounded-3xl shadow-xl space-y-6">
-            <h2 className="text-3xl font-serif font-bold text-[#11141A]">
+      <section className="py-12 bg-[#FFFFFF]">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="bg-[#FFFFFF] border-2 border-slate-200 p-6 sm:p-10 rounded-2xl shadow-lg space-y-5">
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#11141A]">
               Protecting Worker Rights & Fair Workplace Standards
             </h2>
-            <p className="text-lg text-slate-700 leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-700 leading-relaxed">
               Employees deserve to be treated fairly, lawfully, and with dignity. At So Cal Legal Group, we represent individuals facing wrongful termination, workplace harassment, discrimination, retaliation, wage and hour violations, and other employment disputes. We understand the emotional and financial toll these situations can create, and we are committed to protecting your rights while aggressively pursuing the justice and compensation you deserve.
             </p>
           </div>
 
-          <div className="text-center pt-4">
+          <div className="text-center pt-2">
             <button 
               onClick={openConsultModal}
-              className="bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] px-10 py-4 rounded-xl text-lg font-bold shadow-xl uppercase tracking-wider border border-[#B89758] cursor-pointer"
+              className="bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] px-8 py-3.5 rounded-xl text-base font-bold shadow-lg uppercase tracking-wider border border-[#B89758] cursor-pointer"
             >
               Schedule Free Consultation
             </button>
@@ -874,45 +964,47 @@ function EmploymentLawPage({ openConsultModal }: any) {
 
 // Personal Injury Page
 function PersonalInjuryPage({ openConsultModal }: any) {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
+
   return (
-    <main className="pt-36 sm:pt-44 pb-20 lg:pb-0">
-      <section className="py-16 bg-slate-100 text-[#11141A] border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="text-xs font-bold text-[#B89758] uppercase tracking-widest">Practice Area Overview</span>
-          <h1 className="text-4xl lg:text-5xl font-serif font-bold mt-2">
+    <main className="pt-24 sm:pt-28 pb-20 lg:pb-0">
+      {/* Title & Photo Centered Header Banner */}
+      <section className="py-8 sm:py-10 bg-slate-100 text-[#11141A] border-b border-slate-200 text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <span className="text-xs font-bold text-[#B89758] uppercase tracking-widest block">Practice Area Overview</span>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-[#11141A]">
             Personal Injury
           </h1>
+          {/* Practice Area Photo - Centered, Uncropped */}
+          <div className="max-w-lg mx-auto w-full bg-slate-50 rounded-2xl overflow-hidden border-2 border-[#C5A880]/60 shadow-lg mt-4 flex items-center justify-center p-1">
+            <img 
+              src={injuryImg} 
+              alt="Personal Injury Representation" 
+              className="w-full h-auto max-h-64 sm:max-h-72 object-contain mx-auto" 
+            />
+          </div>
         </div>
       </section>
 
-      <section className="py-20 bg-[#FFFFFF]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          {/* Designated Practice Area Photo Slot */}
-          <div className="w-full h-72 sm:h-96 bg-slate-100 rounded-3xl border-2 border-slate-200 shadow-xl flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
-            <Shield className="w-16 h-16 text-[#B89758] mb-4 relative z-10" />
-            <h3 className="text-2xl font-serif font-bold text-[#11141A] relative z-10 mb-2">
-              Personal Injury Practice Area Photo
-            </h3>
-            <p className="text-[#B89758] text-sm font-semibold tracking-wider uppercase relative z-10">
-              [ Designated Photo Space Reserved ]
-            </p>
-            <span className="text-xs text-slate-500 relative z-10 mt-2">Photo to be provided for Personal Injury page</span>
-          </div>
-
-          <div className="bg-[#FFFFFF] border-2 border-slate-200 p-8 sm:p-12 rounded-3xl shadow-xl space-y-6">
-            <h2 className="text-3xl font-serif font-bold text-[#11141A]">
+      <section className="py-12 bg-[#FFFFFF]">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="bg-[#FFFFFF] border-2 border-slate-200 p-6 sm:p-10 rounded-2xl shadow-lg space-y-5">
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#11141A]">
               Aggressive Advocacy for Accident & Negligence Victims
             </h2>
-            <p className="text-lg text-slate-700 leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-700 leading-relaxed">
               A serious injury can disrupt every aspect of your life — physically, emotionally, and financially. Whether you were injured in a motor vehicle accident, slip and fall, or another act of negligence, So Cal Legal Group is prepared to fight for the maximum compensation available for your injuries, lost wages, pain and suffering, and future damages. Our goal is not only to help you recover financially, but to help you move forward with confidence.
             </p>
           </div>
 
-          <div className="text-center pt-4">
+          <div className="text-center pt-2">
             <button 
               onClick={openConsultModal}
-              className="bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] px-10 py-4 rounded-xl text-lg font-bold shadow-xl uppercase tracking-wider border border-[#B89758] cursor-pointer"
+              className="bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] px-8 py-3.5 rounded-xl text-base font-bold shadow-lg uppercase tracking-wider border border-[#B89758] cursor-pointer"
             >
               Schedule Free Consultation
             </button>
@@ -925,45 +1017,47 @@ function PersonalInjuryPage({ openConsultModal }: any) {
 
 // Lemon Law Page
 function LemonLawPage({ openConsultModal }: any) {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
+
   return (
-    <main className="pt-36 sm:pt-44 pb-20 lg:pb-0">
-      <section className="py-16 bg-slate-100 text-[#11141A] border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="text-xs font-bold text-[#B89758] uppercase tracking-widest">Practice Area Overview</span>
-          <h1 className="text-4xl lg:text-5xl font-serif font-bold mt-2">
+    <main className="pt-24 sm:pt-28 pb-20 lg:pb-0">
+      {/* Title & Photo Centered Header Banner */}
+      <section className="py-8 sm:py-10 bg-slate-100 text-[#11141A] border-b border-slate-200 text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <span className="text-xs font-bold text-[#B89758] uppercase tracking-widest block">Practice Area Overview</span>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-[#11141A]">
             Lemon Law
           </h1>
+          {/* Practice Area Photo - Centered, Uncropped with Lemon on Ground Visible */}
+          <div className="max-w-lg mx-auto w-full bg-slate-50 rounded-2xl overflow-hidden border-2 border-[#C5A880]/60 shadow-lg mt-4 flex items-center justify-center p-1">
+            <img 
+              src={lemonImg} 
+              alt="California Lemon Law Buybacks" 
+              className="w-full h-auto max-h-64 sm:max-h-72 object-contain object-bottom mx-auto" 
+            />
+          </div>
         </div>
       </section>
 
-      <section className="py-20 bg-[#FFFFFF]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          {/* Designated Practice Area Photo Slot */}
-          <div className="w-full h-72 sm:h-96 bg-slate-100 rounded-3xl border-2 border-slate-200 shadow-xl flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
-            <Scale className="w-16 h-16 text-[#B89758] mb-4 relative z-10" />
-            <h3 className="text-2xl font-serif font-bold text-[#11141A] relative z-10 mb-2">
-              Lemon Law Practice Area Photo
-            </h3>
-            <p className="text-[#B89758] text-sm font-semibold tracking-wider uppercase relative z-10">
-              [ Designated Photo Space Reserved ]
-            </p>
-            <span className="text-xs text-slate-500 relative z-10 mt-2">Photo to be provided for Lemon Law page</span>
-          </div>
-
-          <div className="bg-[#FFFFFF] border-2 border-slate-200 p-8 sm:p-12 rounded-3xl shadow-xl space-y-6">
-            <h2 className="text-3xl font-serif font-bold text-[#11141A]">
+      <section className="py-12 bg-[#FFFFFF]">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="bg-[#FFFFFF] border-2 border-slate-200 p-6 sm:p-10 rounded-2xl shadow-lg space-y-5">
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#11141A]">
               California Consumer Rights & Vehicle Buybacks
             </h2>
-            <p className="text-lg text-slate-700 leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-700 leading-relaxed">
               Purchasing or leasing a defective vehicle can be frustrating, stressful, and costly. California law protects consumers from being stuck with vehicles that repeatedly fail to meet quality and safety standards. At So Cal Legal Group, we help clients hold manufacturers accountable and pursue buybacks, replacements, and financial compensation under California Lemon Law.
             </p>
           </div>
 
-          <div className="text-center pt-4">
+          <div className="text-center pt-2">
             <button 
               onClick={openConsultModal}
-              className="bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] px-10 py-4 rounded-xl text-lg font-bold shadow-xl uppercase tracking-wider border border-[#B89758] cursor-pointer"
+              className="bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] px-8 py-3.5 rounded-xl text-base font-bold shadow-lg uppercase tracking-wider border border-[#B89758] cursor-pointer"
             >
               Schedule Free Consultation
             </button>
@@ -974,83 +1068,74 @@ function LemonLawPage({ openConsultModal }: any) {
   );
 }
 
-// Testimonials Page with Serverless Review Submission Form
+// Testimonials Page with Live Google Sheets Approved Reviews & Review Submission Form
 function TestimonialsPage({ openConsultModal }: any) {
-  const initialTestimonials = [
-    {
-      quote: "So Cal Legal Group handled my wrongful termination case with absolute professionalism. Ms. Sislyan fought for me every step of the way when my former employer tried to ignore my rights. I felt supported and received the compensation I deserved.",
-      client: "M. R.",
-      matter: "Employment Law & Wage Dispute",
-      rating: 5
-    },
-    {
-      quote: "After my car accident, I was overwhelmed by medical bills and insurance runarounds. Arpi Sislyan stepped in, handled all negotiations, and secured a financial recovery far beyond what I expected. I cannot recommend this firm enough.",
-      client: "D. K.",
-      matter: "Personal Injury & Vehicle Accident",
-      rating: 5
-    },
-    {
-      quote: "I bought a luxury SUV that had constant transmission failure that the dealership could not fix. So Cal Legal Group guided me through California Lemon Law and got the manufacturer to repurchase the vehicle completely. Outstanding legal service!",
-      client: "A. G.",
-      matter: "California Lemon Law Buyback",
-      rating: 5
-    },
-    {
-      quote: "Arpi's attention to detail and honest advice gave me peace of mind during a very stressful workplace harassment dispute. She was always reachable and prepared. Truly a top-tier attorney.",
-      client: "S. L.",
-      matter: "Workplace Harassment Claim",
-      rating: 5
-    },
-    {
-      quote: "Highly recommended firm! They treat you like a person, not a file number. Transparent, strategic, and relentless when fighting for their clients.",
-      client: "J. V.",
-      matter: "Personal Injury Recovery",
-      rating: 5
-    }
-  ];
+  const initialTestimonials: any[] = [];
+  const [testimonialsList, setTestimonialsList] = useState<any[]>([]);
 
-  const [testimonialsList, setTestimonialsList] = useState(() => {
-    const saved = localStorage.getItem("socal_user_reviews");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        return [...initialTestimonials, ...parsed];
-      } catch (e) {
-        return initialTestimonials;
-      }
-    }
-    return initialTestimonials;
-  });
+  useEffect(() => {
+    const googleSheetsUrl = import.meta.env.VITE_GOOGLE_SHEETS_URL || "";
+    if (!googleSheetsUrl) return;
 
-  const [reviewRating, setReviewRating] = useState(5);
+    fetch(googleSheetsUrl)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setTestimonialsList(data);
+        }
+      })
+      .catch((err) => {
+        console.log("No live reviews fetched or Google Sheets pending connection.");
+      });
+  }, []);
+
+  const [reviewRating, setReviewRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewSuccessMsg, setReviewSuccessMsg] = useState("");
+  const [reviewErrorMsg, setReviewErrorMsg] = useState("");
 
   const handleReviewSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmittingReview(true);
     setReviewSuccessMsg("");
+    setReviewErrorMsg("");
 
     const formData = new FormData(e.currentTarget);
-    const clientName = (formData.get("clientName") as string) || "Anonymous Client";
-    const matter = (formData.get("matter") as string) || "Legal Representation";
-    const quote = (formData.get("quote") as string) || "";
+    const clientName = (formData.get("clientName") as string || "").trim();
+    const matter = (formData.get("matter") as string || "").trim();
+    const quote = (formData.get("quote") as string || "").trim();
 
-    const newReview = {
-      client: clientName,
-      matter: matter,
-      quote: quote,
-      rating: reviewRating
+    // Validation checks
+    if (reviewRating === 0) {
+      setReviewErrorMsg("Please select a star rating (1 to 5 stars) for your review.");
+      return;
+    }
+    if (!clientName || clientName.length < 2) {
+      setReviewErrorMsg("Please enter your name or initials (minimum 2 characters).");
+      return;
+    }
+    if (!matter || matter === "") {
+      setReviewErrorMsg("Please select a legal practice area from the dropdown.");
+      return;
+    }
+    if (!quote || quote.length < 10) {
+      setReviewErrorMsg("Please provide your review details (minimum 10 characters).");
+      return;
+    }
+
+    setIsSubmittingReview(true);
+
+    const reviewPayload = {
+      type: "CLIENT_REVIEW",
+      clientName,
+      matter,
+      quote,
+      rating: reviewRating,
+      status: "Pending Approval",
+      date: new Date().toLocaleDateString()
     };
 
-    // Save locally for instant preview
-    const savedLocal = JSON.parse(localStorage.getItem("socal_user_reviews") || "[]");
-    const updatedLocal = [newReview, ...savedLocal];
-    localStorage.setItem("socal_user_reviews", JSON.stringify(updatedLocal));
-    setTestimonialsList([newReview, ...testimonialsList]);
-
-    // Send to Google Sheets (Serverless Static Backend Solution)
+    // Send to Google Sheets (Attorney Moderation Queue)
     const googleSheetsUrl = import.meta.env.VITE_GOOGLE_SHEETS_URL || "";
     try {
       if (googleSheetsUrl) {
@@ -1058,28 +1143,21 @@ function TestimonialsPage({ openConsultModal }: any) {
           method: "POST",
           mode: "no-cors",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            type: "CLIENT_REVIEW",
-            clientName,
-            matter,
-            quote,
-            rating: reviewRating,
-            date: new Date().toLocaleDateString()
-          })
+          body: JSON.stringify(reviewPayload)
         });
       }
     } catch (err) {
-      console.log("Local review logged:", newReview);
+      console.log("Local review pending moderation:", reviewPayload);
     } finally {
       setIsSubmittingReview(false);
-      setReviewSuccessMsg("Thank you! Your review has been submitted and added to our client feedback.");
+      setReviewSuccessMsg("Thank you! Your review has been submitted to So Cal Legal Group.");
       (e.target as HTMLFormElement).reset();
-      setReviewRating(5);
+      setReviewRating(0);
     }
   };
 
   return (
-    <main className="pt-36 sm:pt-44 pb-20 lg:pb-0">
+    <main className="pt-28 sm:pt-36 pb-20 lg:pb-0">
       <section className="py-16 bg-slate-100 text-[#11141A] text-center border-b border-slate-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <span className="text-xs font-bold text-[#B89758] uppercase tracking-widest">Client Feedback & Results</span>
@@ -1096,29 +1174,39 @@ function TestimonialsPage({ openConsultModal }: any) {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
           
           {/* Testimonial Cards */}
-          <div className="grid md:grid-cols-2 gap-8">
-            {testimonialsList.map((t, idx) => (
-              <div key={idx} className="bg-[#FFFFFF] border-2 border-[#C5A880]/40 p-8 rounded-3xl shadow-md flex flex-col justify-between space-y-6">
-                <div>
-                  <div className="flex items-center gap-1 text-[#B89758] mb-4">
-                    {[...Array(t.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-[#B89758]" />
-                    ))}
-                  </div>
-                  <p className="text-slate-800 leading-relaxed text-base italic font-serif">
-                    "{t.quote}"
-                  </p>
-                </div>
-                <div className="pt-4 border-t border-slate-200 flex justify-between items-center text-sm">
+          {testimonialsList.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+              {testimonialsList.map((t, idx) => (
+                <div key={idx} className="bg-[#FFFFFF] border-2 border-[#C5A880]/40 p-8 rounded-3xl shadow-md flex flex-col justify-between space-y-6">
                   <div>
-                    <span className="font-serif font-bold text-[#11141A] block text-base">{t.client}</span>
-                    <span className="text-xs text-slate-600 font-semibold">{t.matter}</span>
+                    <div className="flex items-center gap-1 text-[#B89758] mb-4">
+                      {[...Array(t.rating || 5)].map((_, i) => (
+                        <Star key={i} className="w-5 h-5 fill-[#B89758]" />
+                      ))}
+                    </div>
+                    <p className="text-slate-800 leading-relaxed text-base italic font-serif">
+                      "{t.quote}"
+                    </p>
                   </div>
-                  <Shield className="w-5 h-5 text-[#B89758] opacity-60" />
+                  <div className="pt-4 border-t border-slate-200 flex justify-between items-center text-sm">
+                    <div>
+                      <span className="font-serif font-bold text-[#11141A] block text-base">{t.client || t.clientName}</span>
+                      <span className="text-xs text-slate-600 font-semibold">{t.matter}</span>
+                    </div>
+                    <Shield className="w-5 h-5 text-[#B89758] opacity-60" />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 mb-12 bg-slate-50 border-2 border-dashed border-[#C5A880]/50 rounded-3xl max-w-2xl mx-auto p-8 shadow-sm">
+              <Shield className="w-10 h-10 text-[#B89758] mx-auto mb-3" />
+              <h3 className="font-serif font-bold text-xl text-[#11141A]">Attorney Verified Client Reviews</h3>
+              <p className="text-slate-600 text-sm mt-2 leading-relaxed">
+                All client reviews are submitted directly by verified clients and published upon attorney approval. Have you worked with So Cal Legal Group? Submit your review below!
+              </p>
+            </div>
+          )}
 
           {/* Client Review Submission Box (Serverless Solution) */}
           <div className="bg-[#FFFFFF] border-2 border-[#C5A880] rounded-3xl p-8 sm:p-12 shadow-xl max-w-3xl mx-auto">
@@ -1134,7 +1222,7 @@ function TestimonialsPage({ openConsultModal }: any) {
               </p>
             </div>
 
-            <form onSubmit={handleReviewSubmit} className="space-y-6">
+            <form noValidate onSubmit={handleReviewSubmit} className="space-y-6">
               {/* Star Rating Picker */}
               <div className="text-center">
                 <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-[#11141A]">Select Your Rating *</label>
@@ -1149,7 +1237,11 @@ function TestimonialsPage({ openConsultModal }: any) {
                       className="p-1 focus:outline-none transition-transform hover:scale-110 cursor-pointer"
                     >
                       <Star 
-                        className={`w-8 h-8 ${star <= (hoverRating || reviewRating) ? 'text-[#B89758] fill-[#B89758]' : 'text-slate-300'}`} 
+                        className={`w-8 h-8 transition-colors ${
+                          star <= (hoverRating || reviewRating) 
+                            ? 'text-[#B89758] fill-[#B89758]' 
+                            : 'text-[#D8C6B0] fill-[#F7F2EB]'
+                        }`} 
                       />
                     </button>
                   ))}
@@ -1163,7 +1255,7 @@ function TestimonialsPage({ openConsultModal }: any) {
                     type="text" 
                     name="clientName"
                     required
-                    placeholder="e.g. Arpi S. or Anonymous"
+                    placeholder="Enter your name or initials"
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#C5A880]"
                   />
                 </div>
@@ -1172,12 +1264,15 @@ function TestimonialsPage({ openConsultModal }: any) {
                   <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-[#11141A]">Legal Practice Area *</label>
                   <select 
                     name="matter"
+                    required
+                    defaultValue=""
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#C5A880]"
                   >
-                    <option>Employment Law Claim</option>
-                    <option>Personal Injury Case</option>
-                    <option>Lemon Law Vehicle Buyback</option>
-                    <option>General Legal Service</option>
+                    <option value="" disabled>Select Practice Area</option>
+                    <option value="Employment Law Claim">Employment Law Claim</option>
+                    <option value="Personal Injury Case">Personal Injury Case</option>
+                    <option value="Lemon Law Vehicle Buyback">Lemon Law Vehicle Buyback</option>
+                    <option value="General Legal Service">General Legal Service</option>
                   </select>
                 </div>
               </div>
@@ -1188,7 +1283,7 @@ function TestimonialsPage({ openConsultModal }: any) {
                   rows={4}
                   name="quote"
                   required
-                  placeholder="Share your experience working with Arpi Sislyan and So Cal Legal Group..."
+                  placeholder="Share your working experience with So Cal Legal Group"
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#C5A880] resize-none"
                 ></textarea>
               </div>
@@ -1201,8 +1296,15 @@ function TestimonialsPage({ openConsultModal }: any) {
                 {isSubmittingReview ? "Submitting Review..." : "Submit Client Review"}
               </button>
 
+              {reviewErrorMsg && (
+                <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center gap-3 shadow-sm">
+                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500 flex-shrink-0 animate-pulse" />
+                  <span>{reviewErrorMsg}</span>
+                </div>
+              )}
+
               {reviewSuccessMsg && (
-                <div className="p-4 rounded-xl text-center font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                <div className="p-4 rounded-xl text-center font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 text-sm">
                   {reviewSuccessMsg}
                 </div>
               )}
@@ -1227,20 +1329,62 @@ function TestimonialsPage({ openConsultModal }: any) {
 function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setSubmitMessage("");
-    
+    setErrorMessage("");
+
     const formData = new FormData(e.currentTarget);
+    const firstName = ((formData.get("firstName") as string) || "").trim();
+    const lastName = ((formData.get("lastName") as string) || "").trim();
+    const phone = ((formData.get("phone") as string) || "").trim();
+    const email = ((formData.get("email") as string) || "").trim();
+    const practiceArea = ((formData.get("practiceArea") as string) || "").trim();
+    const message = ((formData.get("message") as string) || "").trim();
+
+    // Validation Rules
+    if (!firstName || firstName.length < 2) {
+      setErrorMessage("Please enter your First Name.");
+      return;
+    }
+    if (!lastName || lastName.length < 2) {
+      setErrorMessage("Please enter your Last Name.");
+      return;
+    }
+    if (!email || !isValidEmail(email)) {
+      setErrorMessage("Please enter a valid email address (e.g. name@example.com).");
+      return;
+    }
+    if (!phone || !isValidUSPhone(phone)) {
+      setErrorMessage("Please enter a valid 10-digit US phone number (e.g. 818-232-2760).");
+      return;
+    }
+    if (!practiceArea || practiceArea === "") {
+      setErrorMessage("Please select a Practice Area.");
+      return;
+    }
+    if (!message || message.length < 5) {
+      setErrorMessage("Please provide details about your legal inquiry.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    
     const data = {
-      firstName: (formData.get("firstName") as string) || "",
-      lastName: (formData.get("lastName") as string) || "",
-      phone: (formData.get("phone") as string) || "",
-      email: (formData.get("email") as string) || "",
-      practiceArea: (formData.get("practiceArea") as string) || "",
-      message: (formData.get("message") as string) || ""
+      firstName,
+      lastName,
+      phone,
+      email,
+      practiceArea,
+      message
     };
 
     const googleSheetsUrl = import.meta.env.VITE_GOOGLE_SHEETS_URL || "";
@@ -1269,25 +1413,13 @@ function ContactPage() {
   };
 
   return (
-    <main className="pt-36 sm:pt-44 pb-20 lg:pb-0">
-      <section className="py-16 bg-slate-100 text-[#11141A] border-b border-slate-200">
+    <main className="pt-24 sm:pt-28 pb-20 lg:pb-0">
+      <section className="py-10 sm:py-14 bg-[#FFFFFF]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="text-xs font-bold text-[#B89758] uppercase tracking-widest">Get In Touch</span>
-          <h1 className="text-4xl lg:text-5xl font-serif font-bold mt-2">
-            Contact So Cal Legal Group
-          </h1>
-          <p className="text-lg text-slate-700 mt-2">
-            Schedule your free consultation today.
-          </p>
-        </div>
-      </section>
-
-      <section className="py-20 bg-[#FFFFFF]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16">
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
             {/* Left: Contact Details */}
-            <div className="space-y-8">
-              <h2 className="text-3xl font-serif font-bold text-[#11141A]">
+            <div className="space-y-6">
+              <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#11141A]">
                 Firm Contact Details
               </h2>
 
@@ -1295,16 +1427,14 @@ function ContactPage() {
                 <div className="flex items-start space-x-4 border-b border-slate-200 pb-5">
                   <Users className="w-6 h-6 text-[#B89758] flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="font-semibold text-slate-500 text-xs uppercase tracking-wider">Attorney</h3>
                     <p className="text-[#11141A] font-bold text-lg">Arpi Sislyan, Esq.</p>
-                    <p className="text-[#B89758] text-xs">Partner &bull; So Cal Legal Group, Inc.</p>
+                    <p className="text-[#B89758] text-xs font-bold uppercase tracking-wider">Partner</p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-4 border-b border-slate-200 pb-5">
                   <Phone className="w-6 h-6 text-[#B89758] flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="font-semibold text-slate-500 text-xs uppercase tracking-wider">Telephone</h3>
                     <a href="tel:8182322760" className="text-xl font-bold text-[#11141A] hover:underline">
                       (818) 232-2760
                     </a>
@@ -1314,22 +1444,18 @@ function ContactPage() {
                 <div className="flex items-start space-x-4 border-b border-slate-200 pb-5">
                   <Mail className="w-6 h-6 text-[#B89758] flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="font-semibold text-slate-500 text-xs uppercase tracking-wider">Email Addresses</h3>
                     <a href="mailto:info@sclglawyers.com" className="text-base font-bold text-[#11141A] hover:underline block">
                       info@sclglawyers.com
-                    </a>
-                    <a href="mailto:arpi@sclglawyers.com" className="text-sm font-medium text-slate-600 hover:underline block mt-1">
-                      arpi@sclglawyers.com
                     </a>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <MapPin className="w-6 h-6 text-[#B89758] flex-shrink-0 mt-1" />
+                  <Mail className="w-6 h-6 text-[#B89758] flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="font-semibold text-slate-500 text-xs uppercase tracking-wider">Mailing Address</h3>
-                    <p className="text-slate-700 font-medium text-sm">
-                      1812 West Burbank Blvd., #36 Burbank CA 91506
+                    <p className="text-slate-800 font-semibold text-base leading-snug">
+                      1812 West Burbank Blvd., #36<br />
+                      Burbank, CA 91506
                     </p>
                   </div>
                 </div>
@@ -1342,7 +1468,7 @@ function ContactPage() {
                 Send Us A Message
               </h2>
 
-              <form className="space-y-6 bg-[#FFFFFF] p-8 rounded-3xl border-2 border-slate-200 shadow-xl" onSubmit={handleFormSubmit}>
+              <form noValidate className="space-y-6 bg-[#FFFFFF] p-8 rounded-3xl border-2 border-slate-200 shadow-xl" onSubmit={handleFormSubmit}>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-[#11141A]">First Name *</label>
@@ -1387,11 +1513,12 @@ function ContactPage() {
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-[#11141A]">Practice Area *</label>
-                  <select name="practiceArea" className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#C5A880]">
-                    <option>Employment Law</option>
-                    <option>Personal Injury</option>
-                    <option>Lemon Law</option>
-                    <option>Other Legal Matter</option>
+                  <select name="practiceArea" defaultValue="" required className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#C5A880]">
+                    <option value="" disabled>Select Practice Area</option>
+                    <option value="Employment Law">Employment Law</option>
+                    <option value="Personal Injury">Personal Injury</option>
+                    <option value="Lemon Law">Lemon Law</option>
+                    <option value="Other Legal Matter">Other Legal Matter</option>
                   </select>
                 </div>
 
@@ -1401,6 +1528,7 @@ function ContactPage() {
                     rows={4}
                     name="message"
                     required
+                    placeholder="Describe your legal issue..."
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#C5A880] resize-none"
                   ></textarea>
                 </div>
@@ -1412,8 +1540,15 @@ function ContactPage() {
                   {isSubmitting ? "Submitting..." : "Submit Message"}
                 </button>
                 
+                {errorMessage && (
+                  <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center gap-3 shadow-sm">
+                    <div className="w-2.5 h-2.5 rounded-full bg-rose-500 flex-shrink-0 animate-pulse" />
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
+
                 {submitMessage && (
-                  <div className="p-4 rounded-xl text-center font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                  <div className="p-4 rounded-xl text-center font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 text-sm">
                     {submitMessage}
                   </div>
                 )}
@@ -1430,20 +1565,56 @@ function ContactPage() {
 function ConsultationModal({ closeModal }: { closeModal: () => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleModalSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setSubmitMessage("");
+    setErrorMessage("");
     
     const formData = new FormData(e.currentTarget);
+    const firstName = ((formData.get("firstName") as string) || "").trim();
+    const lastName = ((formData.get("lastName") as string) || "").trim();
+    const phone = ((formData.get("phone") as string) || "").trim();
+    const email = ((formData.get("email") as string) || "").trim();
+    const practiceArea = ((formData.get("practiceArea") as string) || "").trim();
+    const message = ((formData.get("message") as string) || "").trim();
+
+    // Validation Rules
+    if (!firstName || firstName.length < 2) {
+      setErrorMessage("Please enter your First Name.");
+      return;
+    }
+    if (!lastName || lastName.length < 2) {
+      setErrorMessage("Please enter your Last Name.");
+      return;
+    }
+    if (!email || !isValidEmail(email)) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+    if (!phone || !isValidUSPhone(phone)) {
+      setErrorMessage("Please enter a valid 10-digit US phone number.");
+      return;
+    }
+    if (!practiceArea || practiceArea === "") {
+      setErrorMessage("Please select a Practice Area.");
+      return;
+    }
+    if (!message || message.length < 5) {
+      setErrorMessage("Please provide brief details about your case.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    
     const data = {
-      firstName: (formData.get("firstName") as string) || "",
-      lastName: (formData.get("lastName") as string) || "",
-      phone: (formData.get("phone") as string) || "",
-      email: (formData.get("email") as string) || "",
-      practiceArea: (formData.get("practiceArea") as string) || "",
-      message: (formData.get("message") as string) || ""
+      firstName,
+      lastName,
+      phone,
+      email,
+      practiceArea,
+      message
     };
 
     const googleSheetsUrl = import.meta.env.VITE_GOOGLE_SHEETS_URL || "";
@@ -1487,7 +1658,7 @@ function ConsultationModal({ closeModal }: { closeModal: () => void }) {
           <p className="text-slate-300 text-sm mt-1">Speak directly with So Cal Legal Group, Inc.</p>
         </div>
 
-        <form onSubmit={handleModalSubmit} className="space-y-4">
+        <form noValidate onSubmit={handleModalSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">First Name *</label>
@@ -1512,11 +1683,12 @@ function ConsultationModal({ closeModal }: { closeModal: () => void }) {
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">Practice Area *</label>
-            <select name="practiceArea" className="w-full px-3.5 py-2.5 bg-[#11141A] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-[#C5A880] text-sm">
-              <option>Employment Law</option>
-              <option>Personal Injury</option>
-              <option>Lemon Law</option>
-              <option>Other Legal Matter</option>
+            <select name="practiceArea" defaultValue="" required className="w-full px-3.5 py-2.5 bg-[#11141A] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-[#C5A880] text-sm">
+              <option value="" disabled>Select Practice Area</option>
+              <option value="Employment Law">Employment Law</option>
+              <option value="Personal Injury">Personal Injury</option>
+              <option value="Lemon Law">Lemon Law</option>
+              <option value="Other Legal Matter">Other Legal Matter</option>
             </select>
           </div>
 
@@ -1532,6 +1704,13 @@ function ConsultationModal({ closeModal }: { closeModal: () => void }) {
           >
             {isSubmitting ? "Submitting..." : "Submit Consultation Request"}
           </button>
+
+          {errorMessage && (
+            <div className="p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs font-medium flex items-center gap-2.5 shadow-sm">
+              <div className="w-2 h-2 rounded-full bg-rose-400 flex-shrink-0 animate-pulse" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
 
           {submitMessage && (
             <div className="p-3 bg-emerald-500/20 border border-emerald-500 text-emerald-300 rounded-xl text-center text-xs font-bold">
@@ -1560,11 +1739,14 @@ function Footer({ setCurrentPage, openConsultModal }: any) {
               alt="So Cal Legal Group, Inc."
               className="h-24 w-auto object-contain brightness-0 invert"
             />
-            <div className="text-xs space-y-2 text-slate-300 font-sans">
-              <p><span className="font-bold text-[#C5A880] uppercase tracking-wider block">Attorney</span> Arpi Sislyan, Esq. (Partner)</p>
-              <p><span className="font-bold text-[#C5A880] uppercase tracking-wider block">Telephone</span> (818) 232-2760</p>
-              <p><span className="font-bold text-[#C5A880] uppercase tracking-wider block">Email</span> info@sclglawyers.com</p>
-              <p><span className="font-bold text-[#C5A880] uppercase tracking-wider block">Mailing Address</span> 1812 West Burbank Blvd., #36 Burbank CA 91506</p>
+            <div className="text-sm space-y-3 text-slate-300 font-sans">
+              <p className="font-bold text-white text-base">Arpi Sislyan, Esq. (Partner)</p>
+              <p><a href="tel:8182322760" className="hover:text-[#C5A880] transition-colors">(818) 232-2760</a></p>
+              <p><a href="mailto:info@sclglawyers.com" className="hover:text-[#C5A880] transition-colors">info@sclglawyers.com</a></p>
+              <p className="leading-snug">
+                1812 West Burbank Blvd., #36<br />
+                Burbank, CA 91506
+              </p>
             </div>
           </div>
 
