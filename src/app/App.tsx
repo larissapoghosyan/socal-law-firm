@@ -1406,8 +1406,8 @@ function ContactPage() {
   };
 
   return (
-    <main className="pt-24 sm:pt-28 pb-20 lg:pb-0">
-      <section className="py-10 sm:py-14 bg-[#FFFFFF]">
+    <main className="pt-36 sm:pt-44 lg:pt-48 pb-20 lg:pb-0">
+      <section className="pt-10 sm:pt-14 pb-20 bg-[#FFFFFF]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-start">
             {/* Left: Contact Details */}
