@@ -8,7 +8,7 @@ import injuryImg from "@/imports/injury.png";
 import lemonImg from "@/imports/lemon.png";
 
 // Form Validation Helpers (Strict US Phone & Email format verification)
-const GOOGLE_SHEETS_URL = import.meta.env.VITE_GOOGLE_SHEETS_URL || "";
+const GOOGLE_SHEETS_URL = import.meta.env.VITE_GOOGLE_SHEETS_URL || "https://script.google.com/macros/s/AKfycbxRA0vwCQGvZs7p56l1em2VJDBxmF2G2uwHK3S9NPIfVD1TbdLpzNgjC9nRxMoHpZZvsw/exec";
 
 const isValidEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
