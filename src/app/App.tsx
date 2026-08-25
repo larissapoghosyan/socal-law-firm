@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Phone, Calendar, ChevronDown, MapPin, Mail, Star, Shield, Users, Scale, Award, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
+import { Menu, X, Phone, Calendar, ChevronDown, ChevronLeft, ChevronRight, MapPin, Mail, Star, Shield, Users, Scale, Award, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 import logoImg from "@/imports/Main_logo_socal.png";
 import headshot1 from "@/imports/headshot_1.jpeg";
 import headshot2 from "@/imports/headshot_2.jpeg";
@@ -1072,8 +1072,12 @@ function LemonLawPage({ openConsultModal }: any) {
 
 // Testimonials Page with Live Google Sheets Approved Reviews & Review Submission Form
 function TestimonialsPage({ openConsultModal }: any) {
-  const initialTestimonials: any[] = [];
   const [testimonialsList, setTestimonialsList] = useState<any[]>([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const itemsPerSlide = 3;
 
   useEffect(() => {
     const googleSheetsUrl = GOOGLE_SHEETS_URL;
@@ -1090,6 +1094,59 @@ function TestimonialsPage({ openConsultModal }: any) {
         console.log("No live reviews fetched or Google Sheets pending connection.");
       });
   }, []);
+
+  // Group testimonials into slides of 3
+  const slides: any[][] = [];
+  for (let i = 0; i < testimonialsList.length; i += itemsPerSlide) {
+    slides.push(testimonialsList.slice(i, i + itemsPerSlide));
+  }
+  const totalSlides = slides.length;
+
+  const nextSlide = () => {
+    if (totalSlides <= 1) return;
+    setCurrentSlide((prev) => (prev + 1) % totalSlides);
+  };
+
+  const prevSlide = () => {
+    if (totalSlides <= 1) return;
+    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+  };
+
+  // Keep slide in bounds if reviews update
+  useEffect(() => {
+    if (currentSlide >= totalSlides && totalSlides > 0) {
+      setCurrentSlide(0);
+    }
+  }, [totalSlides, currentSlide]);
+
+  // Dynamic auto-advance every 10 seconds (pauses on hover)
+  useEffect(() => {
+    if (totalSlides <= 1 || isPaused) return;
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    }, 10000);
+    return () => clearInterval(timer);
+  }, [totalSlides, isPaused]);
+
+  // Touch Swipe Handlers for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const minSwipeDistance = 50;
+    if (distance > minSwipeDistance) {
+      nextSlide();
+    } else if (distance < -minSwipeDistance) {
+      prevSlide();
+    }
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
 
   const [reviewRating, setReviewRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -1176,30 +1233,81 @@ function TestimonialsPage({ openConsultModal }: any) {
       <section className="py-20 bg-[#FFFFFF]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
           
-          {/* Testimonial Cards */}
+          {/* Testimonial Carousel (3 at a time with Side Circular Controls) */}
           {testimonialsList.length > 0 && (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-              {testimonialsList.map((t, idx) => (
-                <div key={idx} className="bg-[#FFFFFF] border-2 border-[#C5A880]/40 p-8 rounded-3xl shadow-md flex flex-col justify-between space-y-6">
-                  <div>
-                    <div className="flex items-center gap-1 text-[#B89758] mb-4">
-                      {[...Array(t.rating || 5)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 fill-[#B89758]" />
-                      ))}
-                    </div>
-                    <p className="text-slate-800 leading-relaxed text-base italic font-serif">
-                      "{t.quote}"
-                    </p>
-                  </div>
-                  <div className="pt-4 border-t border-slate-200 flex justify-between items-center text-sm">
-                    <div>
-                      <span className="font-serif font-bold text-[#11141A] block text-base">{t.client || t.clientName}</span>
-                      <span className="text-xs text-slate-600 font-semibold">{t.matter}</span>
-                    </div>
-                    <Shield className="w-5 h-5 text-[#B89758] opacity-60" />
+            <div 
+              className="space-y-8 mb-16"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+            >
+              {/* Relative Carousel Container with Side Circular Buttons */}
+              <div className="relative px-2 sm:px-4">
+                {/* Previous Circular Button (Left Side) */}
+                {totalSlides > 1 && (
+                  <button
+                    onClick={prevSlide}
+                    className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-20 p-3 sm:p-4 rounded-full bg-white/80 hover:bg-[#C5A880] text-[#11141A] border-2 border-[#C5A880]/60 hover:border-[#B89758] backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 active:scale-90 cursor-pointer flex items-center justify-center group"
+                    aria-label="Previous testimonials"
+                  >
+                    <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-[#B89758] group-hover:text-[#11141A] transition-colors" />
+                  </button>
+                )}
+
+                {/* Carousel Viewport with smooth swipe track */}
+                <div 
+                  className="overflow-hidden relative rounded-3xl"
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                >
+                  <div 
+                    className="flex transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
+                    style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                  >
+                    {slides.map((slideItems, slideIdx) => (
+                      <div key={slideIdx} className="w-full flex-shrink-0 px-2 sm:px-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                          {slideItems.map((t, idx) => (
+                            <div 
+                              key={idx} 
+                              className="bg-[#FFFFFF] border-2 border-[#C5A880]/40 p-8 rounded-3xl shadow-md hover:shadow-xl hover:border-[#C5A880] transition-all flex flex-col justify-between space-y-6 h-full"
+                            >
+                              <div>
+                                <div className="flex items-center gap-1 text-[#B89758] mb-4">
+                                  {[...Array(t.rating || 5)].map((_, i) => (
+                                    <Star key={i} className="w-5 h-5 fill-[#B89758]" />
+                                  ))}
+                                </div>
+                                <p className="text-slate-800 leading-relaxed text-base italic font-serif">
+                                  "{t.quote}"
+                                </p>
+                              </div>
+                              <div className="pt-4 border-t border-slate-200 flex justify-between items-center text-sm">
+                                <div>
+                                  <span className="font-serif font-bold text-[#11141A] block text-base">{t.client || t.clientName}</span>
+                                  <span className="text-xs text-slate-600 font-semibold">{t.matter}</span>
+                                </div>
+                                <Shield className="w-5 h-5 text-[#B89758] opacity-60" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
+
+                {/* Next Circular Button (Right Side) */}
+                {totalSlides > 1 && (
+                  <button
+                    onClick={nextSlide}
+                    className="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-20 p-3 sm:p-4 rounded-full bg-white/80 hover:bg-[#C5A880] text-[#11141A] border-2 border-[#C5A880]/60 hover:border-[#B89758] backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 active:scale-90 cursor-pointer flex items-center justify-center group"
+                    aria-label="Next testimonials"
+                  >
+                    <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-[#B89758] group-hover:text-[#11141A] transition-colors" />
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
