@@ -31,6 +31,7 @@ const getInitialRoute = () => {
   if (hash === "employment-law" || hash === "practice-areas/employment-law") return "employment-law";
   if (hash === "testimonials") return "testimonials";
   if (hash === "contact") return "contact";
+  if (hash === "disclaimer" || hash === "legal-disclaimer") return "disclaimer";
 
   const path = window.location.pathname;
   if (path.endsWith("/about") || path.endsWith("/about/") || path.endsWith("/attorney")) return "about";
@@ -39,6 +40,7 @@ const getInitialRoute = () => {
   if (path.includes("employment-law")) return "employment-law";
   if (path.endsWith("/testimonials") || path.endsWith("/testimonials/")) return "testimonials";
   if (path.endsWith("/contact") || path.endsWith("/contact/")) return "contact";
+  if (path.endsWith("/disclaimer") || path.endsWith("/disclaimer/") || path.includes("legal-disclaimer")) return "disclaimer";
   return "home";
 };
 
@@ -95,6 +97,7 @@ export default function App() {
     if (currentPageState === "employment-law") path = "practice-areas/employment-law";
     if (currentPageState === "testimonials") path = "testimonials";
     if (currentPageState === "contact") path = "contact";
+    if (currentPageState === "disclaimer") path = "disclaimer";
     
     if (currentPageState !== "home") {
       window.history.pushState(null, "", `#/${path}`);
@@ -102,95 +105,6 @@ export default function App() {
       window.history.pushState(null, "", window.location.pathname);
     }
   }, [currentPageState]);
-
-  // Helper function to calculate SHA-256 hash of a string
-  async function sha256Hex(message: string): Promise<string> {
-    const msgBuffer = new TextEncoder().encode(message);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-  }
-
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem("socal_auth_granted") === "true";
-  });
-  const [passcodeAttempt, setPasscodeAttempt] = useState("");
-  const [passcodeError, setPasscodeError] = useState("");
-
-  const EXPECTED_HASH = import.meta.env.VITE_SITE_PASSCODE_HASH || "67a8bb5cd1a9a8d9aa2a89405861733a577d30d5aac54c8068d4e3417279e84f";
-
-  const handlePasscodeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const hash = await sha256Hex(passcodeAttempt.trim());
-    if (hash === EXPECTED_HASH) {
-      localStorage.setItem("socal_auth_granted", "true");
-      setIsAuthenticated(true);
-      setPasscodeError("");
-    } else {
-      setPasscodeError("Incorrect passcode. Please try again.");
-    }
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center p-4 font-sans">
-        <div className="max-w-lg w-full bg-[#FFFFFF] border-2 border-[#C5A880]/60 rounded-3xl p-8 sm:p-10 shadow-2xl text-[#11141A] relative overflow-hidden">
-          <div className="text-center mb-8">
-            <img 
-              src={logoImg} 
-              alt="So Cal Legal Group, Inc." 
-              className="h-24 w-auto object-contain mx-auto mb-6" 
-            />
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#C5A880]/15 border border-[#C5A880]/40 rounded-full mb-4 text-xs font-semibold text-[#11141A]">
-              <Shield className="w-3.5 h-3.5 text-[#B89758]" />
-              <span>Private Client Preview</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#11141A] mb-2 tracking-wide">
-              So Cal Legal Group, Inc.
-            </h1>
-            <p className="text-slate-600 text-sm leading-relaxed max-w-sm mx-auto">
-              Welcome to our website preview. Please enter your passcode below to unlock and explore the site.
-            </p>
-          </div>
-
-          <form onSubmit={handlePasscodeSubmit} className="space-y-5">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-2 uppercase tracking-wider">
-                Enter Passcode
-              </label>
-              <input
-                type="password"
-                placeholder="Enter Passcode"
-                value={passcodeAttempt}
-                onChange={(e) => setPasscodeAttempt(e.target.value)}
-                className="w-full px-4 py-3.5 bg-slate-50 border border-slate-300 rounded-xl text-[#11141A] placeholder-slate-400 focus:outline-none focus:border-[#C5A880] focus:ring-2 focus:ring-[#C5A880]/20 transition-all text-base"
-                autoFocus
-              />
-              
-              {passcodeError && (
-                <div className="mt-3 p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-600 text-xs flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span>{passcodeError}</span>
-                </div>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-4 bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer text-base uppercase tracking-wider border border-[#B89758]"
-            >
-              Access Website
-            </button>
-          </form>
-
-          <div className="mt-8 pt-6 border-t border-slate-200 text-center text-xs text-slate-600 space-y-1">
-            <p className="font-semibold text-slate-800">Arpi Sislyan, Esq. &bull; Partner</p>
-            <p>Direct Phone <a href="tel:8182322760" className="text-[#11141A] hover:underline font-bold">(818) 232-2760</a></p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#FFFFFF] text-[#11141A] font-sans selection:bg-[#C5A880] selection:text-[#11141A]">
@@ -209,6 +123,7 @@ export default function App() {
       {currentPageState === "employment-law" && <EmploymentLawPage setCurrentPage={setCurrentPage} openConsultModal={openConsultModal} />}
       {currentPageState === "testimonials" && <TestimonialsPage setCurrentPage={setCurrentPage} openConsultModal={openConsultModal} />}
       {currentPageState === "contact" && <ContactPage />}
+      {currentPageState === "disclaimer" && <DisclaimerPage setCurrentPage={setCurrentPage} openConsultModal={openConsultModal} />}
       
       <Footer setCurrentPage={setCurrentPage} openConsultModal={openConsultModal} />
       <MobileBottomBar openConsultModal={openConsultModal} />
@@ -1648,6 +1563,10 @@ function ContactPage() {
                   {isSubmitting ? "Submitting..." : "Submit Message"}
                 </button>
                 
+                <p className="text-[11px] text-slate-500 text-center leading-relaxed mt-2">
+                  * Notice: Submitting this form does not create an attorney-client relationship. Please do not submit confidential or sensitive details.
+                </p>
+                
                 {errorMessage && (
                   <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center gap-3 shadow-sm">
                     <div className="w-2.5 h-2.5 rounded-full bg-rose-500 flex-shrink-0 animate-pulse" />
@@ -1813,6 +1732,10 @@ function ConsultationModal({ closeModal }: { closeModal: () => void }) {
             {isSubmitting ? "Submitting..." : "Submit Consultation Request"}
           </button>
 
+          <p className="text-[11px] text-slate-400 text-center leading-normal mt-2">
+            * Submitting does not create an attorney-client relationship. Please do not submit confidential information.
+          </p>
+
           {errorMessage && (
             <div className="p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs font-medium flex items-center gap-2.5 shadow-sm">
               <div className="w-2 h-2 rounded-full bg-rose-400 flex-shrink-0 animate-pulse" />
@@ -1828,6 +1751,134 @@ function ConsultationModal({ closeModal }: { closeModal: () => void }) {
         </form>
       </div>
     </div>
+  );
+}
+
+// Dedicated Legal Disclaimer Page Component
+function DisclaimerPage({ setCurrentPage, openConsultModal }: any) {
+  return (
+    <main className="pt-28 sm:pt-36 pb-20 bg-slate-50 min-h-screen font-sans">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Breadcrumb Navigation */}
+        <div className="mb-6 flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <button 
+            onClick={() => setCurrentPage("home")} 
+            className="hover:text-[#11141A] transition-colors cursor-pointer"
+          >
+            Home
+          </button>
+          <span>/</span>
+          <span className="text-[#B89758]">Legal Disclaimer</span>
+        </div>
+
+        {/* Hero Card */}
+        <div className="bg-[#FFFFFF] rounded-3xl p-8 sm:p-12 shadow-sm border border-slate-200 mb-8">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#C5A880]/15 border border-[#C5A880]/40 rounded-full mb-4 text-xs font-bold text-[#11141A] uppercase tracking-wider">
+            <Scale className="w-3.5 h-3.5 text-[#B89758]" />
+            <span>Important Terms & Disclosures</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-[#11141A] mb-4">
+            Legal Disclaimer & Terms of Website Use
+          </h1>
+          <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
+            Please review this legal disclaimer before browsing this website, submitting any information through online forms, or contacting So Cal Legal Group, Inc.
+          </p>
+        </div>
+
+        {/* Detailed Sections */}
+        <div className="space-y-6">
+          
+          <div className="bg-[#FFFFFF] rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-3">
+            <h2 className="text-xl font-serif font-bold text-[#11141A] flex items-center gap-2.5">
+              <Shield className="w-5 h-5 text-[#B89758]" />
+              1. General Information Only — Not Legal Advice
+            </h2>
+            <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+              The materials and information provided on this website are for general informational and educational purposes only. Nothing on this website should be interpreted or construed as legal advice, legal opinion, or the provision of legal services on any specific matter. Every legal dispute or matter depends heavily upon its own specific facts and circumstances.
+            </p>
+            <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+              You should not act or refrain from acting on the basis of any content or information contained on this website without first obtaining personal legal advice from a licensed attorney admitted to practice in your jurisdiction.
+            </p>
+          </div>
+
+          <div className="bg-[#FFFFFF] rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-3">
+            <h2 className="text-xl font-serif font-bold text-[#11141A] flex items-center gap-2.5">
+              <Users className="w-5 h-5 text-[#B89758]" />
+              2. No Attorney-Client Relationship Formed
+            </h2>
+            <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+              Visiting this website, viewing materials, transmitting messages through our online forms, or contacting So Cal Legal Group, Inc. or Arpi Sislyan, Esq. via phone or email does not create an attorney-client relationship.
+            </p>
+            <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+              An attorney-client relationship with So Cal Legal Group, Inc. is established exclusively after:
+            </p>
+            <ul className="list-disc list-inside text-slate-600 text-sm sm:text-base space-y-1.5 pl-2">
+              <li>Our firm has run a formal conflict-of-interest check,</li>
+              <li>We have mutually agreed to legal representation, and</li>
+              <li>Both you and an authorized attorney of So Cal Legal Group, Inc. have fully signed an official written retainer or legal services agreement.</li>
+            </ul>
+          </div>
+
+          <div className="bg-[#FFFFFF] rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-3">
+            <h2 className="text-xl font-serif font-bold text-[#11141A] flex items-center gap-2.5">
+              <Mail className="w-5 h-5 text-[#B89758]" />
+              3. Confidentiality & Electronic Communications Notice
+            </h2>
+            <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+              Please do not transmit confidential, proprietary, or time-sensitive information through this website, web contact forms, or standard unencrypted email. Electronic communications transmitted over the internet cannot be guaranteed as completely secure or private.
+            </p>
+            <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+              Any information communicated prior to the formal execution of a written retainer agreement may not be treated as confidential or protected by attorney-client privilege.
+            </p>
+          </div>
+
+          <div className="bg-[#FFFFFF] rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-3">
+            <h2 className="text-xl font-serif font-bold text-[#11141A] flex items-center gap-2.5">
+              <Award className="w-5 h-5 text-[#B89758]" />
+              4. Prior Results and Testimonials
+            </h2>
+            <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+              Any case results, summaries, settlements, verdicts, or client testimonials displayed on this website are provided solely for illustrative purposes to demonstrate our firm’s background and experience.
+            </p>
+            <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+              Past results and client endorsements do not constitute a guarantee, warranty, or prediction regarding the outcome of any current or future legal matter. Each case depends entirely on its individual facts, evidence, and applicable California and federal statutes.
+            </p>
+          </div>
+
+          <div className="bg-[#FFFFFF] rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-3">
+            <h2 className="text-xl font-serif font-bold text-[#11141A] flex items-center gap-2.5">
+              <Scale className="w-5 h-5 text-[#B89758]" />
+              5. Attorney Advertising & California Bar Admissions
+            </h2>
+            <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+              Under the California Rules of Professional Conduct and applicable legal ethics standards, portions of this website may be considered Attorney Advertising. Arpi Sislyan, Esq. is licensed to practice law in the State of California.
+            </p>
+            <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+              So Cal Legal Group, Inc. does not intend to seek representation of clients in any jurisdiction where this website does not comply with all applicable laws and ethical rules.
+            </p>
+          </div>
+
+          {/* Consultation CTA Banner */}
+          <div className="bg-gradient-to-br from-[#11141A] to-slate-900 rounded-2xl p-8 text-white border border-[#C5A880]/40 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="space-y-2 text-center sm:text-left">
+              <h3 className="text-xl font-serif font-bold text-white">Need Legal Assistance?</h3>
+              <p className="text-sm text-slate-300">
+                Contact our office directly to discuss your workplace, accident, or consumer rights case.
+              </p>
+            </div>
+            <button
+              onClick={openConsultModal}
+              className="bg-[#C5A880] hover:bg-[#B89758] text-[#11141A] px-6 py-3.5 rounded-xl font-bold text-sm uppercase tracking-wider transition-all whitespace-nowrap shadow-lg cursor-pointer border border-[#B89758]"
+            >
+              Request Free Consultation
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
   );
 }
 
@@ -1884,6 +1935,11 @@ function Footer({ setCurrentPage, openConsultModal }: any) {
                   <span>&bull;</span> Contact Us
                 </button>
               </li>
+              <li>
+                <button onClick={() => setCurrentPage("disclaimer")} className="text-slate-300 hover:text-[#C5A880] transition-colors cursor-pointer flex items-center gap-2">
+                  <span>&bull;</span> Legal Disclaimer
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -1925,9 +1981,36 @@ function Footer({ setCurrentPage, openConsultModal }: any) {
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="text-center text-xs text-slate-400">
+        {/* Legal Disclaimer Block */}
+        <div className="pt-8 mb-8 border-t border-slate-800 text-xs text-slate-400 space-y-3 leading-relaxed">
+          <p className="font-semibold text-slate-300 uppercase tracking-wider text-[11px] flex items-center gap-2">
+            <Scale className="w-3.5 h-3.5 text-[#C5A880]" /> Legal Disclaimer & Notice
+          </p>
+          <p>
+            The information presented on this website is for general informational and educational purposes only and does not constitute formal legal advice. Viewing this website or communicating with So Cal Legal Group, Inc. or Arpi Sislyan, Esq. via contact forms, email, or telephone does not create an attorney-client relationship. Confidential, sensitive, or time-critical information should not be transmitted through this website.
+          </p>
+          <p>
+            An attorney-client relationship is created exclusively through an express written agreement signed by both the client and So Cal Legal Group, Inc. Prior case results, verdicts, settlements, and testimonials do not guarantee, warrant, or predict similar outcomes in future matters. Arpi Sislyan, Esq. is licensed to practice law in California. This site may be considered Attorney Advertising under California State Bar rules.
+          </p>
+        </div>
+
+        {/* Copyright & Bottom Bar Links */}
+        <div className="flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-4 pt-4 border-t border-slate-900">
           <p>© {new Date().getFullYear()} So Cal Legal Group, Inc. All Rights Reserved.</p>
+          <div className="flex items-center gap-6">
+            <button 
+              onClick={() => setCurrentPage("disclaimer")} 
+              className="hover:text-[#C5A880] transition-colors cursor-pointer"
+            >
+              Legal Disclaimer
+            </button>
+            <button 
+              onClick={() => setCurrentPage("contact")} 
+              className="hover:text-[#C5A880] transition-colors cursor-pointer"
+            >
+              Contact Us
+            </button>
+          </div>
         </div>
       </div>
     </footer>
