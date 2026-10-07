@@ -7,7 +7,7 @@ import employmentImg from "@/imports/employment.png";
 import injuryImg from "@/imports/injury.png";
 import lemonImg from "@/imports/lemon.png";
 
-// Form Validation Helpers (Strict US Phone & Email format verification)
+// Form validation helpers
 const GOOGLE_SHEETS_URL = import.meta.env.VITE_GOOGLE_SHEETS_URL || "";
 
 const isValidEmail = (email: string): boolean => {
@@ -22,7 +22,7 @@ const isValidUSPhone = (phone: string): boolean => {
   return false;
 };
 
-// Helper to determine route from pathname or hash for static hosting
+// Route resolver for static hosting
 const getInitialRoute = () => {
   const hash = window.location.hash.replace(/^#\/?/, "");
   if (hash === "about" || hash === "attorney") return "about";
@@ -44,7 +44,7 @@ const getInitialRoute = () => {
   return "home";
 };
 
-// Main App Component with Router
+// Main Application Component
 export default function App() {
   const [currentPageState, setCurrentPageState] = useState(getInitialRoute);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -134,7 +134,7 @@ export default function App() {
   );
 }
 
-// Header Component (Light Slate Utility Bar, Crisp White Header with Gentle Folding Motion)
+// Header Component
 function Header({ currentPage, setCurrentPage, openConsultModal }: any) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
@@ -147,18 +147,18 @@ function Header({ currentPage, setCurrentPage, openConsultModal }: any) {
       const currentY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
       const diff = currentY - lastY;
 
-      // Gently fold top bar as soon as user scrolls down past 15px
+      // Collapse top bar on scroll
       setIsScrolled(currentY > 15);
 
-      // Keep header visible at top of page (first 60px)
+      // Keep header visible near top of page
       if (currentY <= 60) {
         setShowHeader(true);
       } 
-      // Gently hide header when scrolling down
+      // Hide header when scrolling down
       else if (diff > 5) {
         setShowHeader(false);
       } 
-      // Gently open header when scrolling up anywhere
+      // Reveal header on scroll up
       else if (diff < -5) {
         setShowHeader(true);
       }
@@ -192,13 +192,13 @@ function Header({ currentPage, setCurrentPage, openConsultModal }: any) {
 
   return (
     <>
-      {/* Smart Gently Folding Header Container */}
+      {/* Header Container */}
       <header 
         className={`fixed top-0 left-0 right-0 z-50 w-full bg-[#FFFFFF] border-b border-slate-200 shadow-sm transition-all duration-500 ease-in-out ${
           showHeader ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
         }`}
       >
-        {/* Light Slate Utility Top Bar - Gently Folds Back on Scroll Down */}
+        {/* Top Utility Bar */}
         <div 
           className="bg-[#F4F6F8] text-[#11141A] border-b border-slate-200/80 text-xs sm:text-sm px-4 sm:px-8 hidden sm:block font-sans overflow-hidden transition-all duration-500 ease-in-out"
           style={{
@@ -221,7 +221,7 @@ function Header({ currentPage, setCurrentPage, openConsultModal }: any) {
           </div>
         </div>
 
-        {/* Main Header Navbar - Gently Compacts on Scroll */}
+        {/* Main Navbar */}
         <div 
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-500 ease-in-out"
           style={{
@@ -406,17 +406,17 @@ function MobileBottomBar({ openConsultModal }: any) {
   );
 }
 
-// Home Page - Light & Spacious Hero Section (Cut down the heavy black!)
+// Home Page Component
 function HomePage({ setCurrentPage, openConsultModal }: any) {
   return (
     <main className="pt-28 sm:pt-36 pb-20 lg:pb-0">
-      {/* Hero Section - Crisp Bright Background with Dark Charcoal Serif Typography & Golden Beige Accents */}
+      {/* Hero Section */}
       <section className="relative bg-[#FFFFFF] text-[#11141A] py-16 lg:py-24 overflow-hidden border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-7 space-y-8">
               
-              {/* Dark Charcoal Serif Heading - Bold & High Contrast Pop */}
+              {/* Hero Heading */}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-black text-[#11141A] leading-tight tracking-tight">
                 Representation Built on{" "}
                 <span className="text-[#B89758] italic block sm:inline-block font-extrabold mt-1">Trust, Integrity & Results</span>
@@ -503,11 +503,11 @@ function HomePage({ setCurrentPage, openConsultModal }: any) {
         </div>
       </section>
 
-      {/* Main Principles Section - Clean Light Split Cards */}
+      {/* Core Values Section */}
       <section className="py-24 bg-[#FFFFFF] border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
           <div className="grid lg:grid-cols-2 gap-12 items-stretch">
-            {/* Clean Framed Card */}
+            {/* Trust & Integrity */}
             <div className="bg-[#FFFFFF] text-[#11141A] p-10 rounded-3xl border-2 border-slate-200 shadow-xl flex flex-col justify-between">
               <div>
                 <h2 className="text-3xl lg:text-4xl font-serif font-bold mb-6 text-[#11141A] leading-tight">
@@ -526,7 +526,7 @@ function HomePage({ setCurrentPage, openConsultModal }: any) {
               </div>
             </div>
 
-            {/* Crisp White Card */}
+            {/* Relentless Advocacy */}
             <div className="bg-[#FFFFFF] p-10 rounded-3xl border-2 border-slate-200 shadow-xl flex flex-col justify-between">
               <div>
                 <h3 className="text-3xl font-serif font-bold mb-6 text-[#11141A]">
@@ -606,7 +606,7 @@ function HomePage({ setCurrentPage, openConsultModal }: any) {
         </div>
       </section>
 
-      {/* Bright & Elegant Free Consultation CTA Banner */}
+      {/* Consultation CTA Banner */}
       <section className="py-20 bg-[#FFFFFF]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-[#FFFFFF] text-[#11141A] rounded-3xl p-10 sm:p-14 border-2 border-[#C5A880] shadow-2xl text-center space-y-8 relative overflow-hidden">
@@ -712,7 +712,7 @@ function AboutPage({ setCurrentPage, openConsultModal }: any) {
                 />
               </div>
 
-              {/* Attorney Contact Details Container - Clean Light Box with Golden Beige Border */}
+              {/* Attorney Contact Details */}
               <div className="bg-[#FFFFFF] text-[#11141A] border-2 border-[#C5A880] rounded-3xl p-7 shadow-xl space-y-5">
                 <h3 className="font-serif font-bold text-2xl text-[#11141A] border-b border-slate-200 pb-3">
                   Contact Details
@@ -836,14 +836,14 @@ function EmploymentLawPage({ openConsultModal }: any) {
 
   return (
     <main className="pt-24 sm:pt-28 pb-20 lg:pb-0">
-      {/* Title & Photo Centered Header Banner */}
+      {/* Header Banner */}
       <section className="py-8 sm:py-10 bg-slate-100 text-[#11141A] border-b border-slate-200 text-center">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
           <span className="text-xs font-bold text-[#B89758] uppercase tracking-widest block">Practice Area Overview</span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-[#11141A]">
             Employment Law
           </h1>
-          {/* Practice Area Photo - Centered, Uncropped with Desk & Scale Visible */}
+          {/* Practice Area Photo */}
           <div className="max-w-lg mx-auto w-full bg-slate-50 rounded-2xl overflow-hidden border-2 border-[#C5A880]/60 shadow-lg mt-4 flex items-center justify-center p-1">
             <img 
               src={employmentImg} 
@@ -889,14 +889,14 @@ function PersonalInjuryPage({ openConsultModal }: any) {
 
   return (
     <main className="pt-24 sm:pt-28 pb-20 lg:pb-0">
-      {/* Title & Photo Centered Header Banner */}
+      {/* Header Banner */}
       <section className="py-8 sm:py-10 bg-slate-100 text-[#11141A] border-b border-slate-200 text-center">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
           <span className="text-xs font-bold text-[#B89758] uppercase tracking-widest block">Practice Area Overview</span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-[#11141A]">
             Personal Injury
           </h1>
-          {/* Practice Area Photo - Centered, Uncropped */}
+          {/* Practice Area Photo */}
           <div className="max-w-lg mx-auto w-full bg-slate-50 rounded-2xl overflow-hidden border-2 border-[#C5A880]/60 shadow-lg mt-4 flex items-center justify-center p-1">
             <img 
               src={injuryImg} 
@@ -942,14 +942,14 @@ function LemonLawPage({ openConsultModal }: any) {
 
   return (
     <main className="pt-24 sm:pt-28 pb-20 lg:pb-0">
-      {/* Title & Photo Centered Header Banner */}
+      {/* Header Banner */}
       <section className="py-8 sm:py-10 bg-slate-100 text-[#11141A] border-b border-slate-200 text-center">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
           <span className="text-xs font-bold text-[#B89758] uppercase tracking-widest block">Practice Area Overview</span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-[#11141A]">
             Lemon Law
           </h1>
-          {/* Practice Area Photo - Centered, Uncropped with Lemon on Ground Visible */}
+          {/* Practice Area Photo */}
           <div className="max-w-lg mx-auto w-full bg-slate-50 rounded-2xl overflow-hidden border-2 border-[#C5A880]/60 shadow-lg mt-4 flex items-center justify-center p-1">
             <img 
               src={lemonImg} 
@@ -985,7 +985,7 @@ function LemonLawPage({ openConsultModal }: any) {
   );
 }
 
-// Testimonials Page with Live Google Sheets Approved Reviews & Review Submission Form
+// Testimonials Page Component
 function TestimonialsPage({ openConsultModal }: any) {
   const [testimonialsList, setTestimonialsList] = useState<any[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -1148,14 +1148,14 @@ function TestimonialsPage({ openConsultModal }: any) {
       <section className="py-20 bg-[#FFFFFF]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
           
-          {/* Testimonial Carousel (3 at a time with Side Circular Controls) */}
+          {/* Testimonial Carousel */}
           {testimonialsList.length > 0 && (
             <div 
               className="space-y-8 mb-16"
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
-              {/* Relative Carousel Container with Side Circular Buttons */}
+              {/* Carousel Container */}
               <div className="relative px-2 sm:px-4">
                 {/* Previous Circular Button (Left Side) */}
                 {totalSlides > 1 && (
@@ -1226,7 +1226,7 @@ function TestimonialsPage({ openConsultModal }: any) {
             </div>
           )}
 
-          {/* Client Review Submission Box (Serverless Solution) */}
+          {/* Client Review Submission Form */}
           <div className="bg-[#FFFFFF] border-2 border-[#C5A880] rounded-3xl p-8 sm:p-12 shadow-xl max-w-3xl mx-auto">
             <div className="text-center mb-8">
               <span className="text-xs font-bold uppercase tracking-widest text-[#11141A] bg-[#C5A880]/15 px-4 py-1.5 rounded-full border border-[#C5A880]/40">
@@ -1882,7 +1882,7 @@ function DisclaimerPage({ setCurrentPage, openConsultModal }: any) {
   );
 }
 
-// Column-Style Distinct Footer Component (Rich Black #0D0D0D, Subdued Off-White Text, Golden Beige #C5A880 Accents)
+// Footer Component
 function Footer({ setCurrentPage, openConsultModal }: any) {
   return (
     <footer className="bg-[#0D0D0D] text-white pt-20 pb-12 border-t-2 border-[#C5A880]">
